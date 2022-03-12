@@ -8,10 +8,10 @@ const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    publishedAt:Date,
    modifiedAt:Date,
    authorId:String,
+   category:String,
    slug:String,
    heroImage:String
 },silent:true});
 
 const Articles=new Model("Articles",ArticlesSchema);
-
 module.exports=Articles;

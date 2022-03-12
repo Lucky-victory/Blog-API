@@ -1,16 +1,22 @@
 {
-   "main":"server.js",
-   "private":true,
-   
-   "scripts":{
-     "dev":"nodemon server.js",
-     "start":"node server.js"
+   "main": "server.js",
+   "private": true,
+   "scripts": {
+      "dev": "nodemon server.js",
+      "start": "node server.js"
    },
-   "dependencies":{
-      "express":"^4.17.2",
-      "harpee":"^3.0.9"
+   "dependencies": {
+      "bcrypt": "^5.0.1",
+      "express": "^4.17.2",
+      "express-async-handler": "^1.2.0",
+      "harpee": "^3.0.9",
+      "html-entities": "^2.3.2",
+      "jsonwebtoken": "^8.5.1",
+      "random-words": "^1.1.2",
+      "shortid": "^2.2.16",
+      "slugify": "^1.6.5"
    },
-   "devDependencies":{
-      "nodemon":"^2.0.10"
+   "devDependencies": {
+      "nodemon": "^2.0.10"
    }
 }
