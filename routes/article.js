@@ -4,3 +4,5 @@ const {getArticleBySlug,deleteArticle,editArticle}=require('../controllers/artic
 router.get('/:slug',getArticleBySlug)
 router.post('/edit/:articleId',editArticle);
 router.delete('/delete/:articleId',deleteArticle);
+
+module.exports=router;
