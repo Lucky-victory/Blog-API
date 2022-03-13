@@ -3,6 +3,6 @@ const {createUser,loginUser,deleteUser}=require("../controllers/auth");
 const {setAuth}=require("../middlewares/auth");
 
 router.post("/register",createUser);
-router.post("/login",loginUser);
+router.post("/login",loginUser,setAuth);
 
 module.exports=router;

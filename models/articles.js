@@ -3,13 +3,14 @@ const connectDB=require('../config/db');
 connectDB();
 const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    title:String,
-   body:String,
+   content:String,
    tags:String,
    publishedAt:Date,
    modifiedAt:Date,
    authorId:String,
    category:String,
    slug:String,
+   views:Number,
    heroImage:String
 },silent:true});
 

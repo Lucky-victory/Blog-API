@@ -41,7 +41,13 @@ res.status(400).json({"message":`user with username '${username}' already exist`
 const newUser= {profileImage,bio,twitter,linkedIn,username,fullname,email};
 
 // hash the password before storing in database
-newUser["password"]= await bcrypt.hash(password,10);
+try{
+
+    newUser["password"]= await bcrypt.hash(String(password),10);
+}
+catch{
+
+}
 newUser["superUser"]=false;
 
 await Authors.create(newUser);
