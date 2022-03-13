@@ -12,7 +12,7 @@ const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    bio:String,
    profileImage:String,
    superUser:Boolean
-}});
+},silent:true});
 
 const Authors=new Model("Authors",ArticlesSchema);
 
