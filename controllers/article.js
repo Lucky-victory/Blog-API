@@ -51,7 +51,7 @@ const editArticle=asyncHandler (async(req,res)=>{
          articleToUpdate["slug"]=slugify(title,{lower:true,strict:true})+"-"+shortid();
          
       }
-      articleToUpdate["updateSlug"] != null || undefined ? delete articleToUpdate["updateSlug"] :"";
+      updateSlug != null || updateSlug != undefined ? delete articleToUpdate["updateSlug"] :"";
       articleToUpdate["id"]=articleId;
       articleToUpdate["modifiedAt"]=new Date().toISOString();
       await Articles.update([articleToUpdate]);
