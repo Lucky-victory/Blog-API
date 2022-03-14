@@ -71,18 +71,15 @@ try{
         return;
     }
     // check if user exist
-    const userExist=await Authors.findOne({email});
-    if(!userExist){
+    const user=await Authors.findOne({email});
+    if(!user){
         res.status(404).json({"message":"user not found",status:404})
         return
     }
-    let passwordMatch;
-    if(user){
-        passwordMatch= await bcrypt.compare(String(password),String(user.password));
+    let passwordMatch= await bcrypt.compare(String(password),String(user.password));
         
-    }
     if(user && !passwordMatch){
-        res.status(401).json({"message":"invalid credentials",status:401});
+        res.status(400).json({"message":"invalid credentials",status:400});
         return
     }
     
