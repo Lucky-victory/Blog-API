@@ -78,7 +78,7 @@ try{
     }
     let passwordMatch;
     if(user){
-        passwordMatch= await bcrypt.compare(password,user.password);
+        passwordMatch= await bcrypt.compare(String(password),String(user.password));
         
     }
     if(user && !passwordMatch){
@@ -87,7 +87,6 @@ try{
     }
     
     req.user=user;
-    res.status(200).json({"message":"login successful",status:200});
     next();
 }
 catch(err){

@@ -9,7 +9,7 @@ const path=require('path');
 app.use(cookieParser())
 
 // middleware to accept json body requests.
-app.use(express.json({extended:false}));
+app.use(express.json());
 // middleware to accept a form 
 app.use(express.urlencoded({extended:false}));
 
@@ -19,13 +19,14 @@ const articlesRouter=require('./routes/articles');
 const articleRouter=require('./routes/article');
 // users route
 const usersRouter=require("./routes/authors");
+const profileRouter=require("./routes/profile");
 const res = require('express/lib/response');
 
 
 app.use('/articles',articlesRouter);
 app.use('/article',articleRouter);
 app.use("/account",usersRouter);
-
+app.use("/profile",profileRouter)
 
 app.get('/',(req,res)=>{
    res.send('hello blog')
@@ -38,8 +39,8 @@ app.use((req,res,next)=>{
 });
 app.use((err,req,res,next)=>{
 const errorLog=errorBuilder(err,req);
-   const currentDir=path.resolve(__dirname,'errLog.log');
-   fs.appendFile(currentDir,JSON.stringify(errorLog,null,4),()=>{
+   const currentDir=path.resolve(__dirname,'errors.log');
+   fs.appendFile(currentDir,JSON.stringify({...errorLog,"timestamp":new Date().toISOString()},null,4),()=>{
    
    })
    res.json(errorLog)
@@ -47,9 +48,9 @@ const errorLog=errorBuilder(err,req);
 function errorBuilder(err,req,){
 return {
 'status':err.status ||500,
-'code':err.syscall,
+'code':err.code,
 'message':err.message,
-'error':process.env.NODE_ENV !=='production'?{err,stack:err.stack}:null
+"stack":process.env.NODE_ENV !=='production'?err.stack:null
 }
 }
 
