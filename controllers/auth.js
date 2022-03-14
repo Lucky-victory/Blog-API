@@ -71,8 +71,8 @@ try{
         return;
     }
     // check if user exist
-    const user=await Authors.findOne({email});
-    if(!user){
+    const userExist=await Authors.findOne({email});
+    if(!userExist){
         res.status(404).json({"message":"user not found",status:404})
         return
     }
