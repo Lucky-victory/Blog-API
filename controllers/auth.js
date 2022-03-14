@@ -8,19 +8,14 @@ const asyncHandler=require("express-async-handler");
 
 // register a new user/author
 const createUser= asyncHandler(async(req,res)=>{
-    try{
-    if(req.body && !Object.keys(req.body)){
-        res.status(400).json({"message":"please fill out the required fields",requiredFields:["fullname","email","password"],status:400})
-        return;
-    }
-
+    
     // generate random username
     const defaultUsername=randomWords({exactly:2,join:"-"})+"-"+randomHexId();
 
     const {profileImage="https://cdn.pixabay.com/photo/2016/08/21/16/31/emoticon-1610228__480.png",bio,twitter,linkedIn,username=defaultUsername,fullname,email,password}=req.body;
     
     if(!fullname || !email || !password){
-        res.status(400).json({"message":"please fill out the required fields",requiredFields:["fullname","email","password"],status:400});
+        res.status(400).json({"message":"please provide the required fields",requiredFields:["fullname","email","password"],status:400});
         return 
     }
 
@@ -66,7 +61,7 @@ try{
 
     const {password,email}=req.body;
     if(!password || !email){
-        res.status(400).json({"message":"please fill out required fields",requiredFields:["email","password"],status:400});
+        res.status(400).json({"message":"please provide the required fields",requiredFields:["email","password"],status:400});
         
         return;
     }
