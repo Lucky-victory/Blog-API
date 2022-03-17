@@ -81,14 +81,34 @@ const getUserInfo=asyncHandler(async(req,res)=>{
 
 });
 
-const destroyAuth=(req,res)=>{
+const destroyAuth= (req,res)=>{
    const {blog_user_token}=cookie.parse(req.headers.cookie || "");
       if(blog_user_token){
          res.cookie("blog_user_token","")
          res.redirect("/")
       }
 }
+const userProfileEdit=asyncHandler(async(req,res)=>{
+const {userId,isAuthenticated}=req;
+if(!isAuthenticated){
+   res.redirect("/account/login");
+   return;
+}
+const userExist= await Authors.findOne({"id":userId});
+if(!userExist){
+res.status(404).json({message:"user not found",status:404});
+return
+}
+i
+if(!(userId == userExist.id) && !userExist.superUser){
+   res.status(403).json({message:"Forbidden",status:403})
+   return 
 
+}
+   
+   await Authors.update({id:userId,...req.body})
+
+});
 
 function verifyToken(token){
    return jwt.verify(token,process.env.JWT_SECRET || "12345")
@@ -99,4 +119,4 @@ function verifyToken(token){
    
 
 
-module.exports={isSuperUser,setAuth,getAuth,getUserProfile,getUser,destroyAuth}
+module.exports={isSuperUser,setAuth,getAuth,getUserProfile,getUser,destroyAuth,userProfileEdit}
