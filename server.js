@@ -5,9 +5,11 @@ const cookieParser=require('cookie-parser');
 const createErrors=require('http-errors');
 const fs=require('fs');
 const path=require('path');
+const morgan=require("morgan");
+
 
 app.use(cookieParser())
-
+app.use(morgan("combined"))
 // middleware to accept json body requests.
 app.use(express.json());
 // middleware to accept a form 
@@ -37,6 +39,8 @@ app.use((req,res,next)=>{
 
    next(createErrors(404))
 });
+app.use(morgan("dev"));
+
 app.use((err,req,res,next)=>{
 const errorLog=errorBuilder(err,req);
    const currentDir=path.resolve(__dirname,'errors.log');

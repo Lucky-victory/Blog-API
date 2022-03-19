@@ -2,35 +2,46 @@ const Articles=require('../models/articles');
 const Authors=require('../models/authors');
 const slugify=require("slugify");
 const asyncHandler=require('express-async-handler');
+const {nester}=require("../helpers/utils");
+const {Sqler}=require("harpee");
 const shortId=require("shortid");
 
 
 
 const getArticles=asyncHandler(async(req,res)=>{
    try{
-
+const queryHandler=new Sqler();
       const {limit=20,page=1}=req.query;
-      const offset=(parseInt(limit) * parseInt(page)) - limit || 0;
-      const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
+      let offset=(parseInt(limit) * parseInt(page)) - limit || 0;
+      //const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
+      const {record_count}=await Articles.describeModel();
+      if((offset ) >= 6){
+         res.status(200).json({"message":"No Articles","articles":null})
+      return
+      }
+      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id WHERE a.published=true LIMIT ${limit} OFFSET ${offset} `
+      let articles=await Articles.query(query);
+      articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username"],{nestedTitle:"author"});
+
       if(articles.length){
          // get authorIds from articles
          let articleAuthorsId=articles.map(({authorId})=>authorId);  
  
          // use those authorId to find the article authors from Authors table
-         const authors=await Authors.findById({getAttributes:["fullname","twitter","linkedIn","id"],id:articleAuthorsId});
+         //const authors=await Authors.findById({getAttributes:["fullname","twitter","linkedIn","id"],id:articleAuthorsId});
 
          // now join the authors with their respective articles
-         const articlesWithAuthor=articles.map((article)=>{
+         /*const articlesWithAuthor=articles.map((article)=>{
             return {...article,'author':{...authors.reduce((accum,author)=>{ article.authorId==author.id ? accum=author:accum; return accum;},{})}}
-               });
+               });*/
 
-               res.status(200).json({"message":"Articles retrieved",status:200,"articles":articlesWithAuthor,result_count:articlesWithAuthor.length,page});
+               res.status(200).json({"message":"Articles retrieved",status:200,"articles":articles,result_count:articles.length,page});
                return
             }
             res.status(200).json({"message":"No Articles","articles":null})
          }
          catch(err){
-            const status=err.status ||400;
+            const status=err.status ||500;
             res.status(status).json({"message":"an error occurred","error":err,status})
           }
 });
@@ -52,7 +63,7 @@ const getTags= asyncHandler(async(req,res)=>{
    }
    catch(err){
 
-      const status=err.status ||400;
+      const status=err.status ||500;
    res.status(status).json({"message":"an error occurred","error":err,status})
    }
 });
@@ -68,7 +79,7 @@ const getCategories=asyncHandler(async(req,res)=>{
       res.status(200).json({"message":"Categories retrieved",status:200,categories})
    }
    catch(err){
-      const status=err.status ||400;
+      const status=err.status ||500;
       res.status(status).json({"message":"an error occurred","error":err,status})
    }
    });
@@ -92,7 +103,7 @@ const createNewArticle=asyncHandler( async(req,res)=>{
       res.status(201).json({status:201,"message":"article successfully created","article":newArticle})
    }
    catch(err){
-      const status=err.status ||400;
+      const status=err.status ||500;
    res.status(status).json({"message":"an error occurred","error":err,status})
 
    }
