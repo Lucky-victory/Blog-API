@@ -9,7 +9,7 @@ const morgan=require("morgan");
 
 
 app.use(cookieParser())
-app.use(morgan("combined"))
+app.use(morgan("dev"))
 // middleware to accept json body requests.
 app.use(express.json());
 // middleware to accept a form 
@@ -22,7 +22,6 @@ const articleRouter=require('./routes/article');
 // users route
 const usersRouter=require("./routes/authors");
 const profileRouter=require("./routes/profile");
-const res = require('express/lib/response');
 
 
 app.use('/articles',articlesRouter);
@@ -39,7 +38,6 @@ app.use((req,res,next)=>{
 
    next(createErrors(404))
 });
-app.use(morgan("dev"));
 
 app.use((err,req,res,next)=>{
 const errorLog=errorBuilder(err,req);

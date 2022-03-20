@@ -71,7 +71,7 @@ currentUser["isAuthorized"]=true;
 }
 const {id,fullname,username,twitter,linkedIn,bio,profileImage,isAuthorized}=currentUser;
 
-res.json({"user":{id,fullname,username,bio,profileImage,twitter,linkedIn,isAuthorized,isAuthenticated},"message":"user retrieved from"});
+res.json({"user":{id,fullname,username,bio,profileImage,twitter,linkedIn,isAuthorized,isAuthenticated,csrfToken:req.csrfToken()},"message":"user retrieved from"});
 
 });
 

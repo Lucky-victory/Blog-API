@@ -6,10 +6,6 @@ const jwt=require("jsonwebtoken");
 const {randomHexId}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
 const nodemailer = require("nodemailer");
-const res = require("express/lib/response");
-
-
-
 
 
 // register a new user/author
