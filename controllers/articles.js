@@ -12,10 +12,10 @@ const getArticles=asyncHandler(async(req,res)=>{
    try{
 const queryHandler=new Sqler();
       const {limit=20,page=1}=req.query;
-      let offset=(parseInt(limit) * parseInt(page)) - limit || 0;
+   let offset=parseInt(limit) * (parseInt(page) - 1) || 0;
       //const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
       const {record_count}=await Articles.describeModel();
-      if((offset ) >= 6){
+      if((record_count - offset ) <= 0){
          res.status(200).json({"message":"No Articles","articles":null})
       return
       }
