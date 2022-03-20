@@ -5,8 +5,8 @@ const asyncHandler=require('express-async-handler');
 const {nester}=require("../helpers/utils");
 const {Sqler}=require("harpee");
 const shortId=require("shortid");
-
-
+const {Converter}=require("showdown");
+const {encode,decode}=require("html-entities");
 
 const getArticles=asyncHandler(async(req,res)=>{
    try{
@@ -14,17 +14,22 @@ const queryHandler=new Sqler();
       let {limit,page}=req.query;
       limit=parseInt(limit) ||20;
       page=parseInt(page) ||1;
-   let offset=(limit * page - 1) || 0;
+   let offset=(limit * (page - 1)) ||0;
       //const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
       const {record_count}=await Articles.describeModel();
-      if((record_count - offset ) <= 0 || ((limit + offset) >=record_count)){
+      if((record_count - offset ) <= 0 || (offset > record_count)){
          res.status(200).json({"message":"No Articles","articles":null})
       return
       }
-      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id WHERE a.published=true LIMIT ${limit} OFFSET ${offset} `
+      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id WHERE published=true LIMIT ${limit} OFFSET ${offset} `
       let articles=await Articles.query(query);
+      let at=articles;
       articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username"],{nestedTitle:"author"});
-
+articles=articles.map((article)=>{
+article.title=decode(article.title);
+article.body=decode(article.body);
+return article
+});
       if(articles.length){
          // get authorIds from articles
          let articleAuthorsId=articles.map(({authorId})=>authorId);  
@@ -55,7 +60,7 @@ const getTags= asyncHandler(async(req,res)=>{
       let {limit,page}=req.query;
       limit=parseInt(limit) ||20;
       page=parseInt(page) ||1;
-   let offset=(limit * page - 1) || 0;
+   let offset=(limit * (page - 1)) || 0;
       // select article tags from Articles table, this returns an array of objects with tags props
       let allTags=await Articles.find({getAttributes:["tags"],limit,offset});
       
@@ -79,7 +84,7 @@ const getCategories=asyncHandler(async(req,res)=>{
       let {limit,page}=req.query;
       limit=parseInt(limit) ||20;
       page=parseInt(page) ||1;
-   let offset=(limit * page - 1) || 0;
+   let offset=(limit * (page - 1)) || 0;
       let categories=await Articles.find({getAttributes:["category"],limit,offset});
       categories=[...categories.reduce((accum,c)=>{c.category !=null ? accum.push(c.category):accum; return accum},[])]
       res.status(200).json({"message":"Categories retrieved",status:200,categories})
@@ -98,10 +103,19 @@ const createNewArticle=asyncHandler( async(req,res)=>{
          res.status(400).json({"message":"Please include article to add",status:400})
          return;
       }
+      const converter=new Converter();
+      const {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false }=req.body;
+      let {title,content}=req.body;
+if(!(title || content)){
+res.sttatus(400).json({"message":"provide at least `title` or `content` "})
+}
+
       const currentDate=new Date().toISOString();
-      const {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',title,content,tags,published=false }=req.body;
       
-      const slug=slugify(title,{lower:true,strict:true})+"-"+shortId();
+      const slug= title ? slugify(title,{lower:true,strict:true})+"-"+shortId() : null;
+      title=encode(title);
+      content= converter.makeHtml(content);
+      content=encode(content);
       const createdAt=currentDate;
       const publishedAt=published? createdAt : null;
       const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published};

@@ -20,6 +20,7 @@
       "nodemailer": "^6.7.2",
       "random-words": "^1.1.2",
       "shortid": "^2.2.8",
+      "showdown": "^2.0.3",
       "slugify": "^1.6.5"
    },
    "devDependencies": {
