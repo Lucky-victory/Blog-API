@@ -1,9 +1,18 @@
-GET https://4901-luckyvictory-blogapi-pzfdy6iu340.ws-eu38.gitpod.io/profile/turn-laid-1bc5
+GET https://4901-luckyvictory-blogapi-pzfdy6iu340.ws-eu38.gitpod.io/profile/land-promised-c11c
 
 ###
-POST  https://4901-luckyvictory-blogapi-pzfdy6iu340.ws-eu38.gitpod.io/articles/create
+POST https://4901-luckyvictory-blogapi-pzfdy6iu340.ws-eu38.gitpod.io/account/logout
 Content-Type: application/json
 
 {
+    "email":"me@3.com",
+    "password":"12345"
+}
 
+###
+PUT  https://4901-luckyvictory-blogapi-pzfdy6iu340.ws-eu38.gitpod.io/profile/edit
+Content-Type: application/json
+
+{
+"bio":"im a web developer"
 }

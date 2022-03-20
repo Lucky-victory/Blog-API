@@ -11,11 +11,13 @@ const shortId=require("shortid");
 const getArticles=asyncHandler(async(req,res)=>{
    try{
 const queryHandler=new Sqler();
-      const {limit=20,page=1}=req.query;
-   let offset=parseInt(limit) * (parseInt(page) - 1) || 0;
+      let {limit,page}=req.query;
+      limit=parseInt(limit) ||20;
+      page=parseInt(page) ||1;
+   let offset=(limit * page - 1) || 0;
       //const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
       const {record_count}=await Articles.describeModel();
-      if((record_count - offset ) <= 0){
+      if((record_count - offset ) <= 0 || ((limit + offset) >=record_count)){
          res.status(200).json({"message":"No Articles","articles":null})
       return
       }
@@ -50,8 +52,10 @@ const queryHandler=new Sqler();
 const getTags= asyncHandler(async(req,res)=>{
    try{
 
-      const {limit=20,page=1}=req.query;
-      const offset=(parseInt(limit) * parseInt(page)) - limit || 0;
+      let {limit,page}=req.query;
+      limit=parseInt(limit) ||20;
+      page=parseInt(page) ||1;
+   let offset=(limit * page - 1) || 0;
       // select article tags from Articles table, this returns an array of objects with tags props
       let allTags=await Articles.find({getAttributes:["tags"],limit,offset});
       
@@ -72,8 +76,10 @@ const getTags= asyncHandler(async(req,res)=>{
 const getCategories=asyncHandler(async(req,res)=>{
    try{
 
-      const {limit=20,page=1}=req.query;
-      const offset=(parseInt(limit) * parseInt(page)) - limit || 0;
+      let {limit,page}=req.query;
+      limit=parseInt(limit) ||20;
+      page=parseInt(page) ||1;
+   let offset=(limit * page - 1) || 0;
       let categories=await Articles.find({getAttributes:["category"],limit,offset});
       categories=[...categories.reduce((accum,c)=>{c.category !=null ? accum.push(c.category):accum; return accum},[])]
       res.status(200).json({"message":"Categories retrieved",status:200,categories})
@@ -93,10 +99,13 @@ const createNewArticle=asyncHandler( async(req,res)=>{
          return;
       }
       const currentDate=new Date().toISOString();
-      const {publishedAt=currentDate,category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',title,content,tags }=req.body;
+      const {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',title,content,tags,published=false }=req.body;
+      
       const slug=slugify(title,{lower:true,strict:true})+"-"+shortId();
-      const newArticle= {publishedAt,title,content,tags,heroImage,slug,category,authorId};
-      newArticle['modifiedAt']=publishedAt;
+      const createdAt=currentDate;
+      const publishedAt=published? createdAt : null;
+      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published};
+      newArticle['modifiedAt']=createdAt;
       newArticle["views"]=0;
       
       await Articles.create(newArticle);

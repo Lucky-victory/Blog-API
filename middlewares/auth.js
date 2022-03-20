@@ -96,17 +96,18 @@ if(!isAuthenticated){
 }
 const userExist= await Authors.findOne({"id":userId});
 if(!userExist){
-res.status(404).json({message:"user not found",status:404});
+res.send({message:"user not found",status:404});
 return
 }
-i
-if(!(userId == userExist.id) && !userExist.superUser){
+
+if((userId !== userExist.id) && !userExist.superUser){
    res.status(403).json({message:"Forbidden",status:403})
    return 
 
 }
    
-   await Authors.update({id:userId,...req.body})
+   await Authors.update({id:userId,...req.body});
+   res.send({'message':'updated'})
 
 });
 
