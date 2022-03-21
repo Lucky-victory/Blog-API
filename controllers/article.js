@@ -18,7 +18,9 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
          res.status(404).json({"message":"article with slug '"+urlSlug+"' was not found",status:404});
    return  ;  
 }
-const {title,content,publishedAt,modifiedAt,slug,tags,heroImage,id,authorId,category,views}=article;
+const {title,content,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views}=article;
+let {tags}=article;
+tags= tags? [tags.split(",").join('","') ]:null
 const {fullname,twitter,linkedIn}=await Authors.findOne({"id":authorId});
 
 const newViewsCount=parseInt(views)+1 || 1;

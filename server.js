@@ -6,6 +6,8 @@ const createErrors=require('http-errors');
 const fs=require('fs');
 const path=require('path');
 const morgan=require("morgan");
+const connectDB=require('./config/db');
+connectDB();
 
 
 app.use(cookieParser())

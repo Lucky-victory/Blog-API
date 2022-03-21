@@ -1,8 +1,11 @@
 const Articles=require('../models/articles');
+const Comments=require('../models/comments');
+const Replies=require('../models/replies');
+
 const Authors=require('../models/authors');
 const slugify=require("slugify");
 const asyncHandler=require('express-async-handler');
-const {nester}=require("../helpers/utils");
+const {nester,arrayBinder}=require("../helpers/utils");
 const {Sqler}=require("harpee");
 const shortId=require("shortid");
 const {Converter}=require("showdown");
@@ -18,34 +21,44 @@ const queryHandler=new Sqler();
       //const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
       const {record_count}=await Articles.describeModel();
       if((record_count - offset ) <= 0 || (offset > record_count)){
-         res.status(200).json({"message":"No Articles","articles":null})
+         res.status(200).json({"message":"No more Articles","articles":[]})
       return
       }
-      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id WHERE published=true LIMIT ${limit} OFFSET ${offset} `
+      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id LIMIT ${limit} OFFSET ${offset} `;
+
       let articles=await Articles.query(query);
-      let at=articles;
+      // nest author info as author property
       articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username"],{nestedTitle:"author"});
-articles=articles.map((article)=>{
-article.title=decode(article.title);
-article.body=decode(article.body);
-return article
+
+      // decode html entities
+ articles=articles.map((article)=>{
+ article.title=decode(article.title);
+ article.body=decode(article.body);
+return article;
 });
+// get article ids to query comments table;
+const articlesId=articles.map((article)=>article.id);
+
+let comments= await Comments.query(`SELECT id,text,postId,userId FROM ArticlesSchema.Comments WHERE postId IN ("${articlesId.join('","')}")`);
+
+// get comment ids to query replies table;
+const commentsId=comments.map((comment)=>comment.id);
+let replies=await Replies.query(`SELECT text,commentId,userId FROM ArticlesSchema.Replies WHERE commentId IN ("${commentsId.join('","')}")`);
+
+// combine comments with replies based on their related id
+comments=arrayBinder(comments,replies,{
+   innerProp:"commentId",outerProp:"id",innerTitle:"replies"
+});
+// combine articles with comments based on their related id
+articles=arrayBinder(articles,comments,{
+   outerProp:"id",innerProp:"postId",innerTitle:"comments"
+});
+
       if(articles.length){
-         // get authorIds from articles
-         let articleAuthorsId=articles.map(({authorId})=>authorId);  
- 
-         // use those authorId to find the article authors from Authors table
-         //const authors=await Authors.findById({getAttributes:["fullname","twitter","linkedIn","id"],id:articleAuthorsId});
-
-         // now join the authors with their respective articles
-         /*const articlesWithAuthor=articles.map((article)=>{
-            return {...article,'author':{...authors.reduce((accum,author)=>{ article.authorId==author.id ? accum=author:accum; return accum;},{})}}
-               });*/
-
                res.status(200).json({"message":"Articles retrieved",status:200,"articles":articles,result_count:articles.length,page});
                return
             }
-            res.status(200).json({"message":"No Articles","articles":null})
+   res.status(200).json({"message":"No Articles","articles":null})
          }
          catch(err){
             const status=err.status ||500;

@@ -32,7 +32,25 @@ const hexId=Math.random().toString(16).substr(2,length);
            newObj[nestedTitle]=nestedObj;
            keys=[newObj];
            return keys;
-        }
+        },
+        arrayBinder(outer,inner,options={}){
+         if(!(Array.isArray(outer) && Array.isArray(inner))){
+            return []
+         }
+      const {innerTitle='nested',outerProp='id',innerProp='postId' }=options;
+      const result=outer.map((item)=>{
+         return (
+         {...item,[innerTitle]:[...inner.reduce((accum,inItem)=>{
+          item[outerProp]==inItem[innerProp] ? accum.push(inItem) : accum;
+          return accum;
+            },[])]
+            })
+      })
+      return result;
+   
+   
+   }
+   
         
        
 }

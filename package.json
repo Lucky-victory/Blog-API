@@ -3,7 +3,8 @@
    "private": true,
    "scripts": {
       "dev": "nodemon server.js",
-      "start": "node server.js"
+      "start": "node server.js",
+      "db:init":"npm install && node ./config/dbInit"
    },
    "dependencies": {
       "bcrypt": "^5.0.1",
