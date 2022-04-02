@@ -1,6 +1,6 @@
 const {Schema,Model}=require("harpee");
 
-const ArticlesSchema=new Schema({name:"B2Schema",fields:{
+const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    title:String,
    content:String,
    tags:String,
