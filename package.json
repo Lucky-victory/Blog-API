@@ -22,7 +22,8 @@
       "random-words": "^1.1.2",
       "shortid": "^2.2.8",
       "showdown": "^2.0.3",
-      "slugify": "^1.6.5"
+      "slugify": "^1.6.5",
+"cors":"^2.8.5"
    },
    "devDependencies": {
       "nodemon": "^2.0.10"
