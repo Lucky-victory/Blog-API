@@ -3,7 +3,7 @@
    "private": true,
    "scripts": {
       "dev": "nodemon server.js",
-      "start": "npm cache clean -f && install && node server.js",
+      "start": "node server.js",
       "db:init":"npm install && node ./config/dbInit"
    },
    "dependencies": {
