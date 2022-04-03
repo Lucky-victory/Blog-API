@@ -24,7 +24,7 @@ const queryHandler=new Sqler();
          res.status(200).json({"message":"No more Articles","articles":[]})
       return
       }
-      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,a._profileImage as profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id LIMIT ${limit} OFFSET ${offset} `;
+      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,a.profileImage as _profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id LIMIT ${limit} OFFSET ${offset} `;
 
       let articles=await Articles.query(query);
       // nest author info as author property
