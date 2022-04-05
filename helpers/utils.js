@@ -77,7 +77,13 @@ generateSlug(title){
    return slug;
 },
 notNullOrUndefined(val){
-  return( typeof val !==null && typeof val !==undefined);
+  return( 
+     Object.prototype.toString.call(val) !='[object Null]' &&
+     Object.prototype.toString.call(val) !='[object Undefined]');
+},
+StringToArray(str,seperator=','){
+   if(!str) return null;
+return String(str).split(seperator)
 }
 
 }

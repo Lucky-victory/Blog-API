@@ -5,7 +5,7 @@ const Replies=require('../models/replies');
 const Authors=require('../models/authors');
 const slugify=require("slugify");
 const asyncHandler=require('express-async-handler');
-const {nester,arrayBinder,generateSlug,calculateReadTime}=require("../helpers/utils");
+const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray}=require("../helpers/utils");
 const {Sqler}=require("harpee");
 const shortId=require("shortid");
 const {Converter}=require("showdown");
@@ -24,7 +24,7 @@ const queryHandler=new Sqler();
          res.status(200).json({message:"No more Articles","articles":[]})
       return
       }
-      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,a.tags,a.category,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,u.profileImage as _profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id LIMIT ${limit} OFFSET ${offset} ORDER BY publishedAt `;
+      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,a.tags,a.category,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,u.profileImage as _profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id ORDER BY publishedAt DESC LIMIT ${limit} OFFSET ${offset} `;
 
       let articles=await Articles.query(query);
       // nest author info as author property
@@ -34,17 +34,16 @@ const queryHandler=new Sqler();
  articles=articles.map((article)=>{
  article.title=decode(article.title);
  article.body=decode(article.body);
+ article.tags=StringToArray(article.tags)
 return article;
 });
 // get article ids to query comments table;
 const articlesId=articles.map((article)=>article.id);
-
-let comments= await Comments.query(`SELECT id,text,postId,userId FROM ArticlesSchema.Comments WHERE postId IN ("${articlesId.join('","')}")`);
-
+let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM ArticlesSchema.Comments WHERE postId IN ("${articlesId.join('","')}") ORDER BY createdAt DESC`);
 // get comment ids to query replies table;
 const commentsId=comments.map((comment)=>comment.id);
-let replies=await Replies.query(`SELECT id,text,commentId,userId FROM ArticlesSchema.Replies WHERE commentId IN ("${commentsId.join('","')}")`);
 
+let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM ArticlesSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
 // combine comments with replies based on their related id
 comments=arrayBinder(comments,replies,{
    innerProp:"commentId",outerProp:"id",innerTitle:"replies"

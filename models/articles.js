@@ -10,6 +10,7 @@ const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    category:String,
    slug:String,
    views:Number,
+   readTime:Number,
    heroImage:String
 },silent:true});
 
