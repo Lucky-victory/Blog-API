@@ -4,6 +4,7 @@ const Authors=require("../models/authors");
 const slugify=require("slugify");
 const asyncHandler=require('express-async-handler');
 const { StringToArray } = require('../helpers/utils');
+const { decode } = require('html-entities');
 
 // get a single article
 const getArticleBySlug= asyncHandler (async (req,res)=>{
@@ -19,8 +20,9 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
          res.status(404).json({"message":"article with slug '"+urlSlug+"' was not found",status:404});
    return  ;  
 }
-const {title,content,body,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views}=article;
-let {tags}=article;
+const {title,content,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views}=article;
+let {tags,body}=article;
+body=decode(body);
 tags= StringToArray(tags);
 const {fullname,twitter,linkedIn,bio,profileImage,username}=await Authors.findOne({"id":authorId});
 
