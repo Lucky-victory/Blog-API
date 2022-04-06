@@ -76,14 +76,22 @@ generateSlug(title){
    const slug=title ? slugify(title+' '+shortId(),slugifyOptions) : null;
    return slug;
 },
+isEmpty(arg){
+return (
+   (!Utils.NullOrUndefined(arg) && !Object.keys(arg).length) || (!Utils.NullOrUndefined(arg) && arg==='')
+   );
+},
+
 NotNullOrUndefined(val){
 if(!Utils.NullOrUndefined(val)) return val;
 },
+
 NullOrUndefined(val){
   return( 
      Object.prototype.toString.call(val) =='[object Null]' ||
      Object.prototype.toString.call(val) =='[object Undefined]');
 },
+
 StringToArray(str,seperator=','){
    if(Utils.NullOrUndefined(str)) return null;
 return String(str).split(seperator)

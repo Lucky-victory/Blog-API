@@ -1,10 +1,11 @@
 const router=require('express').Router();
-const {getArticles,getTags,createNewArticle,getCategories}=require('../controllers/articles');
+const {getArticles: getPublishedArticles,createNewArticle,getCategories}=require('../controllers/articles');
 const cors=require("cors");
+const { editArticle, deleteArticle } = require('../controllers/article');
 
-router.get('/',cors(),getArticles);
-router.get('/tags',cors(),getTags);
-router.get("/categories",cors(),getCategories);
+router.get('/',cors(),getPublishedArticles);
 router.post('/create',createNewArticle);
+router.put('/:articleId',editArticle);
+router.delete('/:articleId',deleteArticle);
 
 module.exports=router;

@@ -4,7 +4,7 @@ const Replies=require('../models/replies');
 
 const Authors=require('../models/authors');
 const asyncHandler=require('express-async-handler');
-const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined}=require("../helpers/utils");
+const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty}=require("../helpers/utils");
 const {Sqler}=require("harpee");
 const {Converter}=require("showdown");
 const converter=new Converter();
@@ -12,22 +12,24 @@ const {encode,decode}=require("html-entities");
 
 
 
-const getArticles=asyncHandler(async(req,res)=>{
+const getPublishedArticles=asyncHandler(async(req,res)=>{
    try{
-const queryHandler=new Sqler();
-      let {limit,page}=req.query;
-      limit=parseInt(limit) ||20;
+      let {page,category,sort='publishedAt|desc'}=req.query;
+      const orderBy=StringToArray(sort,'|')[0];
+      const order=StringToArray(sort,'|')[1] ||'desc';
+    const  limit=20;
       page=parseInt(page) ||1;
    let offset=(limit * (page - 1)) ||0;
-      //const articles=await Articles.find({getAttributes:["title","body","tags","publishedAt","modifiedAt","authorId","heroImage","id","category","slug","views"],limit,offset});
-      const {record_count}=await Articles.describeModel();
-      if((record_count - offset ) <= 0 || (offset > record_count)){
-         res.status(200).json({message:"No more Articles","articles":[]})
+const recordCountQuery=`SELECT count(id) as recordCount FROM ArticlesSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
+const recordCountResult=await Articles.query(recordCountQuery);
+const {recordCount}=recordCountResult[0];
+      if((recordCount - offset ) <= 0 || (offset > recordCount)){
+         res.status(200).json({message:"No more Articles","articles":[]});
       return
       }
-      const query=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,a.tags,a.category,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,u.profileImage as _profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id ORDER BY publishedAt DESC LIMIT ${limit} OFFSET ${offset} `;
+      const articlesQuery=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,a.tags,a.category,a.content,a.readTime,a.modifiedAt,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,u.profileImage as _profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id WHERE a.published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
 
-      let articles=await Articles.query(query);
+      let articles=await Articles.query(articlesQuery);
       // nest author info as author property
       articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
 
@@ -54,15 +56,15 @@ articles=arrayBinder(articles,comments,{
    outerProp:"id",innerProp:"postId",innerTitle:"comments"
 });
 
-      if(articles.length){
-         res.status(200).json({message:"Articles retrieved",status:200,articles,result_count:articles.length,page});
-               return
-            }
-   res.status(200).json({message:"No Articles","articles":null})
+if(!articles.length){
+         res.status(200).json({message:"No Articles","articles":[]})
+         return
+      }
+      res.status(200).json({message:"Articles retrieved",status:200,articles,resultCount:recordCount});
          }
-         catch(err){
-            const status=err.status ||500;
-            res.status(status).json({message:"an error occurred","error":err,status})
+         catch(error){
+            const status=error.status ||500;
+            res.status(status).json({message:"an error occurred",error,status})
           }
 });
 
@@ -84,10 +86,10 @@ const getTags= asyncHandler(async(req,res)=>{
       },[])]
       res.status(200).json({message:"Tags retrieved",status:200,"tags":allTags})
    }
-   catch(err){
+   catch(error){
 
-      const status=err.status ||500;
-   res.status(status).json({message:"an error occurred","error":err,status})
+      const status=error.status ||500;
+   res.status(status).json({message:"an error occurred",error,status})
    }
 });
 
@@ -103,9 +105,9 @@ const getCategories=asyncHandler(async(req,res)=>{
       categories=[...categories.reduce((accum,c)=>{c.category !=null ? accum.push(c.category):accum; return accum},[])]
       res.status(200).json({message:"Categories retrieved",status:200,categories})
    }
-   catch(err){
-      const status=err.status ||500;
-      res.status(status).json({message:"an error occurred","error":err,status})
+   catch(error){
+      const status=error.status ||500;
+      res.status(status).json({message:"an error occurred",error,status})
    }
    });
 
@@ -113,21 +115,19 @@ const getCategories=asyncHandler(async(req,res)=>{
 const createNewArticle=asyncHandler( async(req,res)=>{
    try{
 
-      if(req.body && !Object.keys(req.body).length){
+      if(isEmpty(req.body)){
          res.status(400).json({message:"Please include article to add",status:400})
          return;
       }
-   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,body,content,authorId }=req.body;
+   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content,authorId }=req.body;
       
 if(!(title || content)){
 res.status(400).json({message:"provide at least `title` or `content` "});
 return
 }
 title=encode(title);
-body= converter.makeHtml(body);
-// content= converter.makeHtml(content);
-// content=encode(content);
-body=encode(body)
+content= converter.makeHtml(content);
+content=encode(content);
 const currentDate=new Date().toISOString();  
 const createdAt=currentDate;
 const slug= generateSlug(title);
@@ -135,17 +135,17 @@ const slug= generateSlug(title);
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(body)) ||'';
       const {readTime}=calculateReadTime(totalWords)
       const publishedAt=published? createdAt : null;
-      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,body};
+      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime};
       
       
       
-      await Articles.create(newArticle);
-      res.status(201).json({status:201,message:"article successfully created","article":newArticle})
+     const {inserted_hashes}=await Articles.create(newArticle);
+      res.status(201).json({status:201,message:"article successfully created","article":{id:inserted_hashes[0],...newArticle}})
    }
-   catch(err){
-      const status=err.status ||500;
-   res.status(status).json({message:"an error occurred","error":err,status})
+   catch(error){
+      const status=error.status ||500;
+   res.status(status).json({message:"an error occurred",error,status})
 
    }
 });
-module.exports={getTags,getArticles,createNewArticle,getCategories}
+module.exports={getTags,getArticles: getPublishedArticles,createNewArticle,getCategories}
