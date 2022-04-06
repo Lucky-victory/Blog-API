@@ -3,13 +3,14 @@ const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
 const Authors=require('../models/authors');
-const slugify=require("slugify");
 const asyncHandler=require('express-async-handler');
-const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray}=require("../helpers/utils");
+const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined}=require("../helpers/utils");
 const {Sqler}=require("harpee");
-const shortId=require("shortid");
 const {Converter}=require("showdown");
+const converter=new Converter();
 const {encode,decode}=require("html-entities");
+
+
 
 const getArticles=asyncHandler(async(req,res)=>{
    try{
@@ -65,6 +66,7 @@ articles=arrayBinder(articles,comments,{
           }
 });
 
+
 // Get all article tags
 const getTags= asyncHandler(async(req,res)=>{
    try{
@@ -115,25 +117,25 @@ const createNewArticle=asyncHandler( async(req,res)=>{
          res.status(400).json({message:"Please include article to add",status:400})
          return;
       }
-      const converter=new Converter();
-      const {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false }=req.body;
-      let {title,content}=req.body;
+   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,body,content,authorId }=req.body;
+      
 if(!(title || content)){
 res.status(400).json({message:"provide at least `title` or `content` "});
 return
 }
+title=encode(title);
+body= converter.makeHtml(body);
+// content= converter.makeHtml(content);
+// content=encode(content);
+body=encode(body)
+const currentDate=new Date().toISOString();  
+const createdAt=currentDate;
+const slug= generateSlug(title);
 
-      const currentDate=new Date().toISOString();
-      
-      const slug= generateSlug(title)
-      title=encode(title);
-      content= converter.makeHtml(content);
-      content=encode(content);
-      
-      const {readTime}=calculateReadTime()
-      const createdAt=currentDate;
+const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(body)) ||'';
+      const {readTime}=calculateReadTime(totalWords)
       const publishedAt=published? createdAt : null;
-      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime};
+      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,body};
       
       
       

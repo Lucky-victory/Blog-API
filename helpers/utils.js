@@ -64,7 +64,7 @@ const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
 
    let seconds = '.' + String(rawReadTime).split('.')[1];
    seconds = seconds * .60;
-   const readTime = Math.ceil(minutes + seconds)
+   const readTime = Math.ceil(minutes + seconds)||0;
    return { readTime };
 },
 generateSlug(title){
@@ -73,16 +73,19 @@ generateSlug(title){
       strict:true,
       remove:/[*+~.()'"!:@]/g
    }
-   const slug=title ? slugify(title+''+shortId(),slugifyOptions) : null;
+   const slug=title ? slugify(title+' '+shortId(),slugifyOptions) : null;
    return slug;
 },
-notNullOrUndefined(val){
+NotNullOrUndefined(val){
+if(!Utils.NullOrUndefined(val)) return val;
+},
+NullOrUndefined(val){
   return( 
-     Object.prototype.toString.call(val) !='[object Null]' &&
-     Object.prototype.toString.call(val) !='[object Undefined]');
+     Object.prototype.toString.call(val) =='[object Null]' ||
+     Object.prototype.toString.call(val) =='[object Undefined]');
 },
 StringToArray(str,seperator=','){
-   if(!str) return null;
+   if(Utils.NullOrUndefined(str)) return null;
 return String(str).split(seperator)
 }
 

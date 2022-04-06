@@ -11,7 +11,8 @@ const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    slug:String,
    views:Number,
    readTime:Number,
-   heroImage:String
+   heroImage:String,
+   published:Boolean
 },silent:true});
 
 const Articles=new Model("Articles",ArticlesSchema);
