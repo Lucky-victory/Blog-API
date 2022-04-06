@@ -26,7 +26,7 @@ const {fullname,twitter,linkedIn,bio,profileImage,username}=await Authors.findOn
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,author:{fullname,twitter,linkedIn,profileImage,bio,username,body}});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,body,author:{fullname,twitter,linkedIn,profileImage,bio,username}});
 
 }
 catch(err){
