@@ -3,6 +3,7 @@ const Articles=require('../models/articles');
 const Authors=require("../models/authors");
 const slugify=require("slugify");
 const asyncHandler=require('express-async-handler');
+const { StringToArray } = require('../helpers/utils');
 
 // get a single article
 const getArticleBySlug= asyncHandler (async (req,res)=>{
@@ -18,14 +19,14 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
          res.status(404).json({"message":"article with slug '"+urlSlug+"' was not found",status:404});
    return  ;  
 }
-const {title,content,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views}=article;
+const {title,content,body,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views}=article;
 let {tags}=article;
-tags= tags? [tags.split(",").join('","') ]:null
+tags= StringToArray(tags);
 const {fullname,twitter,linkedIn,bio,profileImage,username}=await Authors.findOne({"id":authorId});
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,author:{fullname,twitter,linkedIn,profileImage,bio,username}});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,author:{fullname,twitter,linkedIn,profileImage,bio,username,body}});
 
 }
 catch(err){
