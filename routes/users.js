@@ -7,6 +7,6 @@ router.post("/register",createUser);
 router.post("/login",loginUser,setAuth)
 router.get("/login",getAuth,getUserProfile);
 router.post("/logout",destroyAuth);
-router.get("/reset-password",sendMail)
+
 
 module.exports=router;

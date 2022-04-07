@@ -1,5 +1,8 @@
 const slugify=require('slugify');
 const shortId=require('shortid');
+const randomWords=require("random-words");
+
+
 const Utils = {
    randomHexId(length = 4) {
       const hexId = Math.random().toString(16).substr(2, length);
@@ -53,11 +56,13 @@ const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
       return result;
 
 
-   },matchWords(words) {
+   },
+   matchWords(words) {
    const wordMatchRegex = /(\w+)/g;
    const wordCount = String(words).match(wordMatchRegex).length;
    return { wordCount }
-},calculateReadTime(words) {
+},
+calculateReadTime(words) {
    const { wordCount } = Utils.matchWords(words);
    const rawReadTime = wordCount / 200;
    const minutes = parseInt(String(rawReadTime).split('.')[0]);
@@ -95,6 +100,17 @@ NullOrUndefined(val){
 StringToArray(str,seperator=','){
    if(Utils.NullOrUndefined(str)) return null;
 return String(str).split(seperator)
+},
+generateUsername(name){
+   // generate random username
+   const defaultUsername=randomWords({exactly:2,join:"-",maxLength:5});
+   const slugifyOptions={
+      lower:true,
+      strict:true,
+      remove:/[*+~.()'"!:@]/g
+   }
+  
+return (Utils.NullOrUndefined(name) ? slugify(defaultUsername,slugifyOptions) :slugify(name,slugifyOptions) )
 }
 
 }

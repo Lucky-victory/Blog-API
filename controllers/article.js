@@ -1,8 +1,10 @@
 
 const Articles=require('../models/articles');
 const Authors=require("../models/authors");
+const Comments=require("../models/comments");
+const Replies=require("../models/replies");
 const asyncHandler=require('express-async-handler');
-const { StringToArray, generateSlug, NullOrUndefined, isEmpty } = require('../helpers/utils');
+const { StringToArray, generateSlug, NullOrUndefined, isEmpty,arrayBinder} = require('../helpers/utils');
 const { decode } = require('html-entities');
 
 // get a single article
@@ -25,9 +27,21 @@ body=decode(body);
 tags= StringToArray(tags);
 const {fullname,twitter,linkedIn,bio,profileImage,username}=await Authors.findOne({"id":authorId});
 
+// query comments table with article id
+let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM ArticlesSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
+// get comment ids to query replies table;
+const commentsId=comments.map((comment)=>comment.id);
+
+let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM ArticlesSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
+// combine comments with replies based on their related id
+comments=arrayBinder(comments,replies,{
+   innerProp:"commentId",outerProp:"id",innerTitle:"replies"
+});
+// combine Articles with Comments based on their related id
+
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,body,author:{fullname,twitter,linkedIn,profileImage,bio,username,readTime}});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,body,author:{fullname,twitter,linkedIn,profileImage,bio,username,readTime,comments}});
 
 }
 catch(err){

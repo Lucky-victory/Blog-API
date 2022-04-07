@@ -69,47 +69,6 @@ if(!articles.length){
 });
 
 
-// Get all article tags
-const getTags= asyncHandler(async(req,res)=>{
-   try{
-
-      let {limit,page}=req.query;
-      limit=parseInt(limit) ||20;
-      page=parseInt(page) ||1;
-   let offset=(limit * (page - 1)) || 0;
-      // select article tags from Articles table, this returns an array of objects with tags props
-      let allTags=await Articles.find({getAttributes:["tags"],limit,offset});
-      
-      // filter out null tags, and flatten the object into an array of strings
-      allTags=[...allTags.reduce((accum,t)=>{t.tags !=null ? accum.push(t.tags):accum
-         return accum;
-      },[])]
-      res.status(200).json({message:"Tags retrieved",status:200,"tags":allTags})
-   }
-   catch(error){
-
-      const status=error.status ||500;
-   res.status(status).json({message:"an error occurred",error,status})
-   }
-});
-
-// Get all article categories
-const getCategories=asyncHandler(async(req,res)=>{
-   try{
-
-      let {limit,page}=req.query;
-      limit=parseInt(limit) ||20;
-      page=parseInt(page) ||1;
-   let offset=(limit * (page - 1)) || 0;
-      let categories=await Articles.find({getAttributes:["category"],limit,offset});
-      categories=[...categories.reduce((accum,c)=>{c.category !=null ? accum.push(c.category):accum; return accum},[])]
-      res.status(200).json({message:"Categories retrieved",status:200,categories})
-   }
-   catch(error){
-      const status=error.status ||500;
-      res.status(status).json({message:"an error occurred",error,status})
-   }
-   });
 
    // Add new article
 const createNewArticle=asyncHandler( async(req,res)=>{
@@ -148,4 +107,4 @@ const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(body)) |
 
    }
 });
-module.exports={getTags,getArticles: getPublishedArticles,createNewArticle,getCategories}
+module.exports={getPublishedArticles,createNewArticle}

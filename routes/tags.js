@@ -1,8 +1,7 @@
-const { getTags } = require('../controllers/articles');
+const { getAllTags,getArticlesByTag } = require('../controllers/tags');
 const cors=require("cors");
-
 const router=require('express').Router();
 
-
-router.get('/tags',cors(),getTags);
+router.get('/',cors(),getAllTags);
+router.get('/:tag',cors(),getArticlesByTag)
 module.exports=router;

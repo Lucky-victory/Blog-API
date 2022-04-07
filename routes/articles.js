@@ -1,5 +1,5 @@
 const router=require('express').Router();
-const {getArticles: getPublishedArticles,createNewArticle,getCategories}=require('../controllers/articles');
+const { getPublishedArticles,createNewArticle,getCategories}=require('../controllers/articles');
 const cors=require("cors");
 const { editArticle, deleteArticle } = require('../controllers/article');
 

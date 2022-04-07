@@ -1,6 +1,6 @@
 const express=require('express');
 const app=express();
-const PORT=process.env.PORT ||4901;
+const PORT=process.env.PORT ||4456;
 const cookieParser=require('cookie-parser');
 const createErrors=require('http-errors');
 const fs=require('fs');
@@ -22,14 +22,20 @@ const articlesRouter=require('./routes/articles');
 // single article route
 const articleRouter=require('./routes/article');
 // users route
-const usersRouter=require("./routes/authors");
+const usersRouter=require("./routes/users");
 const profileRouter=require("./routes/profile");
+const tagsRouter=require('./routes/tags');
+const categoryRouter=require('./routes/category');
+const authorRouter=require('./routes/author');
 
 
 app.use('/articles',articlesRouter);
 app.use('/article',articleRouter);
 app.use("/account",usersRouter);
 app.use("/profile",profileRouter)
+app.use('/tags',tagsRouter);
+app.use('/category',categoryRouter);
+app.use('/author',authorRouter);
 
 app.get('/',(req,res)=>{
    res.send('hello blog')
