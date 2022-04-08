@@ -8,7 +8,7 @@ const createErrors=require('http-errors');
 const fs=require('fs');
 const path=require('path');
 const morgan=require("morgan");
-const { isDev } = require('./constants');
+const { IS_DEV } = require('./constants');
 const connectDB=require('./config/db');
 connectDB();
 
@@ -63,7 +63,7 @@ return {
 status,
 code,
 message,
-"stack":isDev ? stack : null
+"stack":IS_DEV ? stack : null
 }
 }
 
