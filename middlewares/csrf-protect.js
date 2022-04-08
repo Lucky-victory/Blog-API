@@ -1,9 +1,9 @@
 const csurf=require("csurf");
-const { isProd } = require("../constants");
+const { IS_PROD } = require("../constants");
 
 const csrfProtect=csurf({cookie:{
-    httpOnly:isProd,
-    secure:isProd
+    httpOnly:IS_PROD,
+    secure:IS_PROD
 }});
 
 module.exports={csrfProtect};

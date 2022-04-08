@@ -1,7 +1,7 @@
 const cookie=require("cookie");
 const { NullOrUndefined } = require("./utils");
 const jwt=require('jsonwebtoken');
-const { isProd } = require("../constants");
+const { IS_PROD } = require("../constants");
 
 
 const getJwtFromCookies=(req)=>{
@@ -11,7 +11,7 @@ const getJwtFromCookies=(req)=>{
 return ({token})
 }
 const setJwtToCookies=(res,token='')=>{
-    res.cookie("blog_user_token",token,{httpOnly:isProd,secure:isProd});
+    res.cookie("blog_user_token",token,{httpOnly:IS_PROD,secure:IS_PROD});
 }
 const verifyToken=(token)=>{
     return jwt.verify(token,process.env.JWT_SECRET || "12345")
