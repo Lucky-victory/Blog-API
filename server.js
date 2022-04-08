@@ -1,3 +1,5 @@
+
+require('dotenv').config();
 const express=require('express');
 const app=express();
 const PORT=process.env.PORT ||4456;
@@ -6,6 +8,7 @@ const createErrors=require('http-errors');
 const fs=require('fs');
 const path=require('path');
 const morgan=require("morgan");
+const { isDev } = require('./constants');
 const connectDB=require('./config/db');
 connectDB();
 
@@ -28,13 +31,12 @@ const tagsRouter=require('./routes/tags');
 const categoryRouter=require('./routes/category');
 const authorRouter=require('./routes/author');
 
-
 app.use('/articles',articlesRouter);
 app.use('/article',articleRouter);
 app.use("/account",usersRouter);
 app.use("/profile",profileRouter)
 app.use('/tags',tagsRouter);
-app.use('/category',categoryRouter);
+app.use('/categories',categoryRouter);
 app.use('/author',authorRouter);
 
 app.get('/',(req,res)=>{
@@ -50,17 +52,18 @@ app.use((req,res,next)=>{
 app.use((err,req,res,next)=>{
 const errorLog=errorBuilder(err,req);
    const currentDir=path.resolve(__dirname,'errors.log');
-   fs.appendFile(currentDir,JSON.stringify({...errorLog,"timestamp":new Date().toISOString()},null,4),()=>{
+   fs.appendFile(currentDir,JSON.stringify({...errorLog,timestamp:new Date().toISOString()},null,4),()=>{
    
    })
    res.json(errorLog)
 });
 function errorBuilder(err,req,){
+   const {stack,status=500,code,message}=err;
 return {
-'status':err.status ||500,
-'code':err.code,
-'message':err.message,
-"stack":process.env.NODE_ENV !=='production'?err.stack:null
+status,
+code,
+message,
+"stack":isDev ? stack : null
 }
 }
 

@@ -1,15 +1,14 @@
+'use strict';
 const Articles=require('../models/articles');
 const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
-const Authors=require('../models/authors');
 const asyncHandler=require('express-async-handler');
 const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty}=require("../helpers/utils");
 const {Sqler}=require("harpee");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
-
 
 
 const getPublishedArticles=asyncHandler(async(req,res)=>{
@@ -20,9 +19,9 @@ const getPublishedArticles=asyncHandler(async(req,res)=>{
     const  limit=20;
       page=parseInt(page) ||1;
    let offset=(limit * (page - 1)) ||0;
-const recordCountQuery=`SELECT count(id) as recordCount FROM ArticlesSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
-const recordCountResult=await Articles.query(recordCountQuery);
-const {recordCount}=recordCountResult[0];
+   const recordCountQuery=`SELECT count(id) as recordCount FROM ArticlesSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
+  const recordCountResult=await Articles.query(recordCountQuery);
+  const {recordCount}=recordCountResult[0];
       if((recordCount - offset ) <= 0 || (offset > recordCount)){
          res.status(200).json({message:"No more Articles","articles":[]});
       return
@@ -36,7 +35,7 @@ const {recordCount}=recordCountResult[0];
       // decode html entities
  articles=articles.map((article)=>{
  article.title=decode(article.title);
- article.body=decode(article.body);
+ article.content=decode(article.content);
  article.tags=StringToArray(article.tags)
 return article;
 });
@@ -74,11 +73,13 @@ if(!articles.length){
 const createNewArticle=asyncHandler( async(req,res)=>{
    try{
 
+      if(!req.isAuthenticated) return res.status(403).json({message:'Unathorized, you cant add an article',status:403});
+
       if(isEmpty(req.body)){
          res.status(400).json({message:"Please include article to add",status:400})
          return;
       }
-   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content,authorId }=req.body;
+   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content }=req.body;
       
 if(!(title || content)){
 res.status(400).json({message:"provide at least `title` or `content` "});
@@ -90,8 +91,8 @@ content=encode(content);
 const currentDate=new Date().toISOString();  
 const createdAt=currentDate;
 const slug= generateSlug(title);
-
-const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(body)) ||'';
+const authorId=req.userId;
+const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
       const {readTime}=calculateReadTime(totalWords)
       const publishedAt=published? createdAt : null;
       const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime};

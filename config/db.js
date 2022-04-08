@@ -1,5 +1,5 @@
 const {createConnection}=require('harpee');
 
-const connectDB=()=>createConnection({host:"https://hashnode-lv.harperdbcloud.com",password:"@veek.247",username:"veek"});
+const connectDB=()=>createConnection({host:process.env.DB_HOST,password:process.env.DB_PASS,username:process.env.DB_USER});
 
 module.exports=connectDB;

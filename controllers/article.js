@@ -4,7 +4,7 @@ const Authors=require("../models/authors");
 const Comments=require("../models/comments");
 const Replies=require("../models/replies");
 const asyncHandler=require('express-async-handler');
-const { StringToArray, generateSlug, NullOrUndefined, isEmpty,arrayBinder} = require('../helpers/utils');
+const { StringToArray, generateSlug, NullOrUndefined, isEmpty,arrayBinder, stripKeysFromObj} = require('../helpers/utils');
 const { decode } = require('html-entities');
 
 // get a single article
@@ -21,9 +21,9 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
          res.status(404).json({message:`article with slug '${urlSlug}' was not found`,status:404});
    return  ;  
 }
-const {title,content,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,readTime}=article;
-let {tags,body}=article;
-body=decode(body);
+const {title,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,readTime,intro}=article;
+let {tags,content}=article;
+content=decode(content);
 tags= StringToArray(tags);
 const {fullname,twitter,linkedIn,bio,profileImage,username}=await Authors.findOne({"id":authorId});
 
@@ -41,7 +41,7 @@ comments=arrayBinder(comments,replies,{
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,heroImage,id,category,body,author:{fullname,twitter,linkedIn,profileImage,bio,username,readTime,comments}});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,intro,heroImage,id,category,author:{'id':authorId,fullname,twitter,linkedIn,profileImage,bio,username,readTime},comments});
 
 }
 catch(err){
@@ -53,23 +53,24 @@ catch(err){
 // edit article
 const editArticle=asyncHandler (async(req,res)=>{
    try{
-
+      if(!req.isAuthenticated) return res.status(403).json({message:'Forbidden, not logged in',status:403});
+      const userId=req.userId;
+      const user= await Authors.findOne({'id':userId});
+      if(user && user.id != userId) return res.status(401).json({message:'Unathorized, you can\'t edit this article',status:401});
+      
       const {articleId}=req.params;
-      if(!articleId){
-         res.status(400).json({message:"No article id provided",status:400});
-         return
-      }
-      if(isEmpty(req.body)){
-         res.status(400).json({message:"Nothing to update, body not provided",status:400});
-         return 
-      }
+      if(!articleId) return res.status(400).json({message:"No article id provided",status:400});
+
+      
+   if(isEmpty(req.body)) return res.status(400).json({message:"Nothing to update, body not provided",status:400});
+      
       const {title,updateSlug}=req.body;
       const articleToUpdate=req.body || {};
       if(title && updateSlug){
          articleToUpdate["slug"]=generateSlug(title);
          
       }
-      !NullOrUndefined(updateSlug) ? delete articleToUpdate["updateSlug"] :"";
+      !NullOrUndefined(updateSlug) ? stripKeysFromObj(articleToUpdate,['updateSlug']) :"";
       articleToUpdate["id"]=articleId;
       articleToUpdate["modifiedAt"]=new Date().toISOString();
      const {update_hashes,skipped_hashes}= await Articles.update([articleToUpdate]);
@@ -94,8 +95,6 @@ const deleteArticle=asyncHandler(async(req,res)=>{
      res.status(400).json({message:"No article id provided"});
      return
    }
-   
-   
    const {deleted_hashes,skipped_hashes}=await Articles.findByIdAndRemove([articleId]);
    if(skipped_hashes[0]){
 
@@ -105,7 +104,7 @@ const deleteArticle=asyncHandler(async(req,res)=>{
    res.status(200).json({message:`sucessfully deleted article with id ${deleted_hashes[0]}`,status:200});
 }
 catch(err){
-   const status=err.status ||400;
+   const status=err.status ||500;
    res.status(status).json({"message":"an error occurred","error":err,status});
 }
    

@@ -111,8 +111,23 @@ generateUsername(name){
    }
   
 return (Utils.NullOrUndefined(name) ? slugify(defaultUsername,slugifyOptions) :slugify(name,slugifyOptions) )
-}
+},
+stripKeysFromObj(obj={},keysArr=[]){
+   const keysToDrop = {};
+   for (let i = 0; i < keysArr.length; i++) {
+      keysToDrop[keysArr[i]] = true;
+   }
+   const newObj = {};
+   for (const key in obj) {
 
+      if (keysToDrop[key] || !obj.hasOwnProperty(key)) {
+         continue;
+      }
+      newObj[key] = obj[key];
+   }
+   return newObj;
+
+}
 }
 
 module.exports = Utils;

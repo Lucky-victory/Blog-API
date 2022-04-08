@@ -1,5 +1,6 @@
 const csurf=require("csurf");
-const isProd=process.env.NODE_ENV ==='production';
+const { isProd } = require("../constants");
+
 const csrfProtect=csurf({cookie:{
     httpOnly:isProd,
     secure:isProd

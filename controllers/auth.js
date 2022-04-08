@@ -1,18 +1,22 @@
 "use strict";
 const Authors=require("../models/authors");
 const bcrypt=require("bcrypt");
-const { generateUsername}=require("../helpers/utils");
+const { generateUsername, stripKeysFromObj}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
-const nodemailer = require("nodemailer");
+const { encode } = require("html-entities");
+const {Converter}= require("showdown");
+const converter=new Converter();
 
 
 // register a new user/author
 const createUser= asyncHandler(async(req,res)=>{
     try{
     
-    const {profileImage="https://cdn.pixabay.com/photo/2016/08/21/16/31/emoticon-1610228__480.png",bio,twitter,linkedIn,fullname,email,password}=req.body;
+    const {profileImage="https://cdn.pixabay.com/photo/2016/08/21/16/31/emoticon-1610228__480.png",twitter,linkedIn,github,fullname,email,password}=req.body;
     
-    let {username}=req.body;
+    let {username,bio}=req.body;
+    bio= converter.makeHtml(bio);
+    bio=encode(bio);
     username=generateUsername(username);
 
     if(!fullname || !email || !password){
@@ -34,7 +38,7 @@ res.status(400).json({message:`'${username}' have been taken`});
     return
 }
 const joinedAt=new Date().toISOString();
-const newUser= {profileImage,bio,twitter,linkedIn,website,joinedAt,username,fullname,email,superUser:false};
+const newUser= {profileImage,bio,twitter,linkedIn,joinedAt,username,fullname,email,superUser:false,github};
 
 // hash the password before storing in database
 try{
@@ -63,24 +67,24 @@ try{
 
     const {password,email}=req.body;
     if(!password || !email){
-        res.status(400).json({"message":"please provide the required fields",requiredFields:["email","password"],status:400});
+        res.status(400).json({message:"please provide the required fields",requiredFields:["email","password"],status:400});
         
         return;
     }
     // check if user exist
     const user=await Authors.findOne({email});
     if(!user){
-        res.status(404).json({"message":"user not found",status:404})
+        res.status(404).json({message:"user not found",status:404})
         return
     }
-    let passwordMatch= await bcrypt.compare(String(password),String(user.password));
+    const passwordMatch= await bcrypt.compare(String(password),user.password);
         
     if(user && !passwordMatch){
-        res.status(400).json({"message":"invalid credentials",status:400});
+        res.status(400).json({message:"invalid credentials",status:400});
         return
     }
     
-    req.user=user;
+    req.user=stripKeysFromObj(user,['joinedAt','__createdtime__','__updatedtime__','password']);
     next();
 }
 catch(error){
