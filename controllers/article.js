@@ -21,12 +21,13 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
          res.status(404).json({message:`article with slug '${urlSlug}' was not found`,status:404});
    return  ;  
 }
-const {title,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,readTime,intro}=article;
-let {tags,content}=article;
+const {title,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,readTime}=article;
+let {tags,content,intro}=article;
 content=decode(content);
 tags= StringToArray(tags);
-const {fullname,twitter,linkedIn,bio,profileImage,username}=await Authors.findOne({"id":authorId});
-
+intro=decode(intro);
+let {fullname,twitter,linkedIn,profileImage,username,bio}=await Authors.findOne({"id":authorId});
+bio=decode(bio);
 // query comments table with article id
 let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM ArticlesSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
 // get comment ids to query replies table;
@@ -54,12 +55,12 @@ catch(err){
 const editArticle=asyncHandler (async(req,res)=>{
    try{
       if(!req.isAuthenticated) return res.status(403).json({message:'Forbidden, not logged in',status:403});
-      const userId=req.userId;
-      const user= await Authors.findOne({'id':userId});
-      if(user && user.id != userId) return res.status(401).json({message:'Unathorized, you can\'t edit this article',status:401});
-      
+      const {userId,superUser}=req;
+   
       const {articleId}=req.params;
       if(!articleId) return res.status(400).json({message:"No article id provided",status:400});
+const article=Articles.findOne({id:articleId})
+      if(article.authorId != userId && !superUser) return res.status(401).json({message:'Unathorized, you can\'t edit this article',status:401});
 
       
    if(isEmpty(req.body)) return res.status(400).json({message:"Nothing to update, body not provided",status:400});
@@ -92,7 +93,7 @@ const deleteArticle=asyncHandler(async(req,res)=>{
 
       const {articleId}=req.params;
       if(!articleId){
-     res.status(400).json({message:"No article id provided"});
+     res.status(400).json({message:"No article id provided",status:400});
      return
    }
    const {deleted_hashes,skipped_hashes}=await Articles.findByIdAndRemove([articleId]);

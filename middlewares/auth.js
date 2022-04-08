@@ -1,43 +1,34 @@
 
 const asyncHandler=require("express-async-handler");
 const Authors=require("../models/authors");
-const { createUser } = require("../controllers/auth");
 const { getJwtFromCookies,verifyToken,generateToken,setJwtToCookies } = require("../helpers/auth");
 const { NotNullOrUndefined } = require("../helpers/utils");
 const { decode } = require("html-entities");
 
 
-const isAuthent=async(req,res,next)=>{
-
-}
-const isSuperUser=async(req,res,next)=>{
-
-}
 const setAuth=(req,res,next)=>{
 const {user}=req;
 if(user){
    const token=generateToken({id:user.id,superUser:user.superUser});
    setJwtToCookies(res,token);
 
-res.status(200).json({message:"login successful",status:200,user});
-    
-   next();
-   return
+return res.status(200).json({message:"login successful",status:200,user});
+
 }
-res.status(401)
 
 }
 const authenticateUser=(req,res,next)=>{
       const {token}=getJwtFromCookies(req);
       if(token){
-         const {id}=verifyToken(token);
+         const {id,superUser}=verifyToken(token);
          if(id){
             req.isAuthenticated=true;
             req.userId=id;
+            req.superUser=superUser;
          }
          next();
       }else{
-      res.status(403).json({message:'not authenticated',status:403})
+         res.status(403).json({message:'Forbidden, not logged in',status:403})
       }
    
 }
@@ -114,4 +105,4 @@ const infoToUpdate=req.body;
    
 
 
-module.exports={isSuperUser,setAuth,authenticateUser,getUserProfile,getUserByUsername,destroyAuth,userProfileEdit}
+module.exports={setAuth,authenticateUser,getUserProfile,getUserByUsername,destroyAuth,userProfileEdit}

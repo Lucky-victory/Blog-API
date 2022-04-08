@@ -1,7 +1,7 @@
 "use strict";
 const Authors=require("../models/authors");
 const bcrypt=require("bcrypt");
-const { generateUsername, stripKeysFromObj}=require("../helpers/utils");
+const { generateUsername, stripKeysFromObj, NullOrUndefined, isEmpty}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
 const { encode } = require("html-entities");
 const {Converter}= require("showdown");
@@ -17,32 +17,32 @@ const createUser= asyncHandler(async(req,res)=>{
     let {username,bio}=req.body;
     bio= converter.makeHtml(bio);
     bio=encode(bio);
-    username=generateUsername(username);
-
     if(!fullname || !email || !password){
-        res.status(400).json({message:"please provide the required fields",requiredFields:["fullname","email","password"],status:400});
-        return 
+       return res.status(400).json({message:"please provide the required fields",requiredFields:["fullname","email","password"],status:400});
+
     }
+    username=generateUsername(
+        !NullOrUndefined(username) && !isEmpty(username)?
+        username : fullname
+        );
 
     // check if a user with the email already exist;
     const emailExist= await Authors.findOne({email});
 
 if(emailExist){
-res.status(400).json({message:"user already exist"});
-    return
+return res.status(400).json({message:"user already exist"});
+    
 }
 // check if a user with the username already exist;
 const usernameExist= await Authors.findOne({username});
 if(usernameExist){
-res.status(400).json({message:`'${username}' have been taken`});
-    return
+return res.status(400).json({message:`'${username}' have been taken`});
 }
 const joinedAt=new Date().toISOString();
 const newUser= {profileImage,bio,twitter,linkedIn,joinedAt,username,fullname,email,superUser:false,github};
 
 // hash the password before storing in database
 try{
-
     newUser["password"]= await bcrypt.hash(String(password),10);
 }
 catch{
@@ -67,21 +67,19 @@ try{
 
     const {password,email}=req.body;
     if(!password || !email){
-        res.status(400).json({message:"please provide the required fields",requiredFields:["email","password"],status:400});
-        
-        return;
+      return res.status(400).json({message:"please provide the required fields",requiredFields:["email","password"],status:400});
     }
     // check if user exist
     const user=await Authors.findOne({email});
     if(!user){
-        res.status(404).json({message:"user not found",status:404})
-        return
+       return res.status(404).json({message:"user not found",status:404})
+        
     }
     const passwordMatch= await bcrypt.compare(String(password),user.password);
         
     if(user && !passwordMatch){
-        res.status(400).json({message:"invalid credentials",status:400});
-        return
+     return res.status(400).json({message:"invalid credentials",status:400});
+    
     }
     
     req.user=stripKeysFromObj(user,['joinedAt','__createdtime__','__updatedtime__','password']);

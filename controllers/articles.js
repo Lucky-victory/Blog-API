@@ -79,7 +79,7 @@ const createNewArticle=asyncHandler( async(req,res)=>{
          res.status(400).json({message:"Please include article to add",status:400})
          return;
       }
-   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content }=req.body;
+   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content,intro }=req.body;
       
 if(!(title || content)){
 res.status(400).json({message:"provide at least `title` or `content` "});
@@ -88,6 +88,8 @@ return
 title=encode(title);
 content= converter.makeHtml(content);
 content=encode(content);
+intro=converter.makeHtml(intro);
+intro=encode(intro);
 const currentDate=new Date().toISOString();  
 const createdAt=currentDate;
 const slug= generateSlug(title);
@@ -95,7 +97,7 @@ const authorId=req.userId;
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
       const {readTime}=calculateReadTime(totalWords)
       const publishedAt=published? createdAt : null;
-      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime};
+      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
       
       
       
