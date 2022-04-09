@@ -36,6 +36,7 @@ const getPublishedArticles=asyncHandler(async(req,res)=>{
  articles=articles.map((article)=>{
  article.title=decode(article.title);
  article.content=decode(article.content);
+ article.intro=decode(article.intro);
  article.author.bio=decode(article.author.bio);
  article.tags=StringToArray(article.tags)
 return article;
