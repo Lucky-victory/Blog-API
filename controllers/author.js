@@ -21,7 +21,6 @@ const getArticlesByAuthor=asyncHandler(async(req,res)=>{
        return
        }
        const articlesQuery=`${ARTICLES_SQL_QUERY} AND u.username='${author}' ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
- 
        let articles=await Articles.query(articlesQuery);
        // nest author info as author property
        articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
@@ -30,8 +29,10 @@ const getArticlesByAuthor=asyncHandler(async(req,res)=>{
   articles=articles.map((article)=>{
   article.title=decode(article.title);
   article.content=decode(article.content);
+   article.author.bio=decode(article.author.bio);
+
+  article.tags=StringToArray(article.tags);
   article.intro=decode(article.intro);
-  article.tags=StringToArray(article.tags)
  return article;
  });
  if(!articles.length){

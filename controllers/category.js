@@ -36,6 +36,7 @@ const getCategories=asyncHandler(async(req,res)=>{
            res.status(200).json({message:"No more Articles","articles":[]});
         return
         }
+<<<<<<< HEAD
         const articlesQuery=`${ARTICLES_SQL_QUERY} ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
   
         let articles=await Articles.query(articlesQuery);
@@ -47,7 +48,8 @@ const getCategories=asyncHandler(async(req,res)=>{
    article.title=decode(article.title);
    article.content=decode(article.content);
    article.intro=decode(article.intro);
-   article.tags=StringToArray(article.tags)
+   article.tags=StringToArray(article.tags);
+    article.author.bio=decode(article.author.bio);
   return article;
   });
   if(!articles.length){

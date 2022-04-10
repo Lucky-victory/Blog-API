@@ -45,6 +45,7 @@ const getAllTags= asyncHandler(async(req,res)=>{
   res.status(200).json({message:"No Articles","articles":[]});
       return
         }
+<<<<<<< HEAD
         const articlesQuery=`${ARTICLES_SQL_QUERY} ${!NullOrUndefined(tag) ? ` AND tags LIKE("${tag.join('","')}")`:''}  ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
          
  let articles=await Articles.query(articlesQuery);
@@ -56,6 +57,7 @@ articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_user
    article.title=decode(article.title);
    article.content=decode(article.content);
    article.intro=decode(article.intro);
+    article.author.bio=decode(article.author.bio);
    article.tags=StringToArray(article.tags)
   return article;
   });
