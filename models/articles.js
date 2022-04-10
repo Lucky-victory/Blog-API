@@ -1,9 +1,10 @@
 const {Schema,Model}=require("harpee");
 
-const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
+const BlogSchema=new Schema({name:"BlogSchema",fields:{
    title:String,
    content:String,
    tags:String,
+   createdAt:Date,
    publishedAt:Date,
    modifiedAt:Date,
    authorId:String,
@@ -12,8 +13,9 @@ const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
    views:Number,
    readTime:Number,
    heroImage:String,
+   intro:String,
    published:Boolean
-},silent:true});
+},silent:true,primaryKey:'id'});
 
-const Articles=new Model("Articles",ArticlesSchema);
+const Articles=new Model("Articles",BlogSchema);
 module.exports=Articles;

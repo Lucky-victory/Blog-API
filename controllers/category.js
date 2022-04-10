@@ -1,7 +1,8 @@
 const asyncHandler=require('express-async-handler');
 const {nester,NullOrUndefined,StringToArray, NotNullOrUndefined}=require('../helpers/utils');
 const {decode}=require('html-entities');
-const Articles=require('../models/articles')
+const Articles=require('../models/articles');
+const { ARTICLES_SQL_QUERY } = require('../constants');
 // Get all article categories
 const getCategories=asyncHandler(async(req,res)=>{
     try{
@@ -10,7 +11,7 @@ const getCategories=asyncHandler(async(req,res)=>{
        const limit=20;
        page=parseInt(page) ||1;
     let offset=(limit * (page - 1)) || 0;
-       let categories=await Articles.query(`SELECT DISTINCT category FROM ArticlesSchema.Articles ${limit} ${offset}`);
+       let categories=await Articles.query(`SELECT DISTINCT category FROM BlogSchema.Articles ${limit} ${offset}`);
        categories=[...categories.reduce((accum,c)=>{!NullOrUndefined(c.category) ? accum.push(c.category):accum; return accum},[])]
        res.status(200).json({message:"Categories retrieved",status:200,categories})
     }
@@ -28,14 +29,14 @@ const getCategories=asyncHandler(async(req,res)=>{
       const  limit=20;
         page=parseInt(page) ||1;
      let offset=(limit * (page - 1)) ||0;
-  const recordCountQuery=`SELECT count(id) as recordCount FROM ArticlesSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
+  const recordCountQuery=`SELECT count(id) as recordCount FROM BlogSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
   const recordCountResult=await Articles.query(recordCountQuery);
   const {recordCount}=recordCountResult[0];
         if((recordCount - offset ) <= 0 || (offset > recordCount)){
            res.status(200).json({message:"No more Articles","articles":[]});
         return
         }
-        const articlesQuery=`SELECT a.id,a.publishedAt,a.title,a.authorId,a.body,a.views,a.heroImage,a.slug,a.tags,a.category,a.content,a.readTime,a.modifiedAt,u.fullname as _fullname,u.id as _id,u.twitter as _twitter,u.linkedIn as _linkedin,u.bio as _bio,u.username as _username,u.profileImage as _profileImage FROM ArticlesSchema.Articles as a INNER JOIN ArticlesSchema.Authors as u ON a.authorId=u.id WHERE a.published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
+        const articlesQuery=`${ARTICLES_SQL_QUERY} ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
   
         let articles=await Articles.query(articlesQuery);
         // nest author info as author property
@@ -44,7 +45,8 @@ const getCategories=asyncHandler(async(req,res)=>{
         // decode html entities
    articles=articles.map((article)=>{
    article.title=decode(article.title);
-   article.body=decode(article.body);
+   article.content=decode(article.content);
+   article.intro=decode(article.intro);
    article.tags=StringToArray(article.tags)
   return article;
   });

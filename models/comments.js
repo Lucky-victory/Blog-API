@@ -1,13 +1,13 @@
 const {Schema,Model}=require("harpee");
 
-const ArticlesSchema=new Schema({name:"ArticlesSchema",fields:{
+const BlogSchema=new Schema({name:"BlogSchema",fields:{
    approved:Boolean,
    postId:String,
    text:String,
    createdAt:Date,
    modifiedAt:Date,
    userId:String,
-},silent:true});
+},silent:true,primaryKey:'id'});
 
-const Comments=new Model("Comments",ArticlesSchema);
+const Comments=new Model("Comments",BlogSchema);
 module.exports=Comments;

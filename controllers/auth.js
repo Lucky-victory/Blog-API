@@ -1,5 +1,5 @@
 "use strict";
-const Authors=require("../models/authors");
+const Users=require("../models/users");
 const bcrypt=require("bcrypt");
 const { generateUsername, stripKeysFromObj, NullOrUndefined, isEmpty}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
@@ -27,14 +27,14 @@ const createUser= asyncHandler(async(req,res)=>{
         );
 
     // check if a user with the email already exist;
-    const emailExist= await Authors.findOne({email});
+    const emailExist= await Users.findOne({email});
 
 if(emailExist){
 return res.status(400).json({message:"user already exist"});
     
 }
 // check if a user with the username already exist;
-const usernameExist= await Authors.findOne({username});
+const usernameExist= await Users.findOne({username});
 if(usernameExist){
 return res.status(400).json({message:`'${username}' have been taken`});
 }
@@ -50,7 +50,7 @@ catch{
 }
 
 
-await Authors.create(newUser);
+await Users.create(newUser);
 res.status(201).json({message:"new user created",status:201});
 }
 catch(error){
@@ -70,7 +70,7 @@ try{
       return res.status(400).json({message:"please provide the required fields",requiredFields:["email","password"],status:400});
     }
     // check if user exist
-    const user=await Authors.findOne({email});
+    const user=await Users.findOne({email});
     if(!user){
        return res.status(404).json({message:"user not found",status:404})
         

@@ -1,6 +1,6 @@
 
 const Articles=require('../models/articles');
-const Authors=require("../models/authors");
+const Users=require("../models/users");
 const Comments=require("../models/comments");
 const Replies=require("../models/replies");
 const asyncHandler=require('express-async-handler');
@@ -26,14 +26,14 @@ let {tags,content,intro}=article;
 content=decode(content);
 tags= StringToArray(tags);
 intro=decode(intro);
-let {fullname,twitter,linkedIn,profileImage,username,bio}=await Authors.findOne({"id":authorId});
+let {fullname,twitter,linkedIn,profileImage,username,bio}=await Users.findOne({"id":authorId});
 bio=decode(bio);
 // query comments table with article id
-let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM ArticlesSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
+let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
 // get comment ids to query replies table;
 const commentsId=comments.map((comment)=>comment.id);
 
-let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM ArticlesSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
+let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
 // combine comments with replies based on their related id
 comments=arrayBinder(comments,replies,{
    innerProp:"commentId",outerProp:"id",innerTitle:"replies"

@@ -1,6 +1,6 @@
 
 const asyncHandler=require("express-async-handler");
-const Authors=require("../models/authors");
+const Users=require("../models/users");
 const { getJwtFromCookies,verifyToken,generateToken,setJwtToCookies } = require("../helpers/auth");
 const { NotNullOrUndefined } = require("../helpers/utils");
 const { decode } = require("html-entities");
@@ -50,13 +50,13 @@ if(!usernameSlug){
 }
 const {userId,isAuthenticated}=req;
 
-let currentUser= await Authors.findOne({"username":usernameSlug});
+let currentUser= await Users.findOne({"username":usernameSlug});
 if(!currentUser){
    res.status(404).json({message:"user not found",status:404});
    return;
 }
 if(userId && userId == currentUser.id){
-// currentUser= await Authors.findOne({"id":userId});
+// currentUser= await Users.findOne({"id":userId});
 currentUser["isAuthorized"]=true;
 }
 const {id,fullname,username,twitter,linkedIn,github,profileImage,isAuthorized}=currentUser;
@@ -83,7 +83,7 @@ if(!isAuthenticated){
    res.redirect("/account/login");
    return;
 }
-const userExist= await Authors.findOne({id:userId});
+const userExist= await Users.findOne({id:userId});
 if(!userExist){
 res.send({message:"user not found",status:404});
 return
@@ -96,7 +96,7 @@ if((userId !== userExist.id) && !userExist.superUser){
 }
 const infoToUpdate=req.body;
    
- await Authors.update({id:userId, ...NotNullOrUndefined(infoToUpdate)});
+ await Users.update({id:userId, ...NotNullOrUndefined(infoToUpdate)});
    res.send({message:'profile successfully updated',status:200})
 
 });
