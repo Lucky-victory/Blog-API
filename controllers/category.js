@@ -36,7 +36,6 @@ const getCategories=asyncHandler(async(req,res)=>{
            res.status(200).json({message:"No more Articles","articles":[]});
         return
         }
-<<<<<<< HEAD
         const articlesQuery=`${ARTICLES_SQL_QUERY} ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
   
         let articles=await Articles.query(articlesQuery);
