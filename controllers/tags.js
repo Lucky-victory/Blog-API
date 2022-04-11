@@ -45,7 +45,6 @@ const getAllTags= asyncHandler(async(req,res)=>{
   res.status(200).json({message:"No Articles","articles":[]});
       return
         }
-<<<<<<< HEAD
         const articlesQuery=`${ARTICLES_SQL_QUERY} ${!NullOrUndefined(tag) ? ` AND tags LIKE("${tag.join('","')}")`:''}  ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
          
  let articles=await Articles.query(articlesQuery);
