@@ -4,11 +4,13 @@ const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
 const asyncHandler=require('express-async-handler');
-const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty}=require("../helpers/utils");
+const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
 const { ARTICLES_SQL_QUERY } = require('../constants');
+const ArticleTags = require('../models/articleTags');
+const Tags = require('../models/tags');
 
 
 const getPublishedArticles=asyncHandler(async(req,res)=>{
@@ -32,17 +34,31 @@ const getPublishedArticles=asyncHandler(async(req,res)=>{
       // nest author info as author property
       articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
 
-      // decode html entities
- articles=articles.map((article)=>{
- article.title=decode(article.title);
- article.content=decode(article.content);
- article.intro=decode(article.intro);
- article.author.bio=decode(article.author.bio);
- article.tags=StringToArray(article.tags)
-return article;
-});
+  
 // get article ids to query comments table;
 const articlesId=articles.map((article)=>article.id);
+ 
+let tagIds=await ArticleTags.query(`SELECT tagId FROM BlogSchema.ArticleTags WHERE postId IN("${articlesId.join('","')}")`);
+tagIds=ObjectArrayToStringArray(tagIds);
+
+let tags= await Tags.query(`SELECT text,id FROM BlogSchema.Tags WHERE id IN("${tagIds.join('","')}")`);
+console.log(tags);
+let r=tagIds.reduce((acc,a,i)=>{
+ if(a ==tags[i].i){
+acc.push(tags[i])
+ }
+ return acc
+},[]);
+console.log(r);
+    // decode html entities
+    articles=articles.map((article)=>{
+      article.title=decode(article.title);
+      article.content=decode(article.content);
+      article.intro=decode(article.intro);
+      article.author.bio=decode(article.author.bio);
+      
+     return article;
+     });
 let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId IN ("${articlesId.join('","')}") ORDER BY createdAt DESC`);
 // get comment ids to query replies table;
 const commentsId=comments.map((comment)=>comment.id);
