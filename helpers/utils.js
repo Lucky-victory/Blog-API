@@ -143,6 +143,14 @@ AddPropsToObject(arrayOfObj, newProps) {
       return (arrayOfObj.map((item) => Object.assign(item, newProps)))
 
    }
+},
+ObjectArrayToStringArray(arrayOfObj) {
+   return arrayOfObj.reduce((accum, item) => {
+      for (let key in item) {
+         accum.push(item[key])
+      }
+      return accum;
+   }, [])
 }
 }
 
