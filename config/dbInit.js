@@ -5,7 +5,7 @@ const Users= require("../models/users");
 const Articles= require("../models/articles");
 const Comments= require("../models/comments");
 const Replies= require("../models/replies");
-const { calculateReadTime, generateSlug } = require('../helpers/utils');
+const { CalculateReadTime, GenerateSlug } = require('../helpers/utils');
 
 async function runDb(){
 

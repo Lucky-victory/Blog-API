@@ -4,7 +4,7 @@ const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
 const asyncHandler=require('express-async-handler');
-const {nester,arrayBinder,generateSlug,calculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty}=require("../helpers/utils");
+const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty}=require("../helpers/utils");
 const {Sqler}=require("harpee");
 const {Converter}=require("showdown");
 const converter=new Converter();
@@ -31,7 +31,7 @@ const getPublishedArticles=asyncHandler(async(req,res)=>{
 
       let articles=await Articles.query(articlesQuery);
       // nest author info as author property
-      articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
+      articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
 
       // decode html entities
  articles=articles.map((article)=>{
@@ -50,11 +50,11 @@ const commentsId=comments.map((comment)=>comment.id);
 
 let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
 // combine comments with replies based on their related id
-comments=arrayBinder(comments,replies,{
+comments=ArrayBinder(comments,replies,{
    innerProp:"commentId",outerProp:"id",innerTitle:"replies"
 });
 // combine Articles with Comments based on their related id
-articles=arrayBinder(articles,comments,{
+articles=ArrayBinder(articles,comments,{
    outerProp:"id",innerProp:"postId",innerTitle:"comments"
 });
 
@@ -95,10 +95,10 @@ intro=converter.makeHtml(intro);
 intro=encode(intro);
 const currentDate=new Date().toISOString();  
 const createdAt=currentDate;
-const slug= generateSlug(title);
+const slug= GenerateSlug(title);
 const authorId=req.userId;
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
-      const {readTime}=calculateReadTime(totalWords)
+      const {readTime}=CalculateReadTime(totalWords)
       const publishedAt=published? createdAt : null;
       const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
       

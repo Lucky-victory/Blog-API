@@ -1,5 +1,5 @@
 const asyncHandler=require('express-async-handler');
-const {nester,NullOrUndefined,StringToArray}=require('../helpers/utils');
+const {Nester,NullOrUndefined,StringToArray}=require('../helpers/utils');
 const {decode}=require('html-entities');
 const Articles=require('../models/articles');
 const { ARTICLES_SQL_QUERY } = require('../constants');
@@ -23,7 +23,7 @@ const getArticlesByAuthor=asyncHandler(async(req,res)=>{
        const articlesQuery=`${ARTICLES_SQL_QUERY} AND u.username='${author}' ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
        let articles=await Articles.query(articlesQuery);
        // nest author info as author property
-       articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
+       articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
  
        // decode html entities
   articles=articles.map((article)=>{

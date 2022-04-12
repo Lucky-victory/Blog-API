@@ -1,5 +1,5 @@
 const asyncHandler=require('express-async-handler');
-const {NullOrUndefined,StringToArray,nester}=require('../helpers/utils');
+const {NullOrUndefined,StringToArray,Nester}=require('../helpers/utils');
 const Articles=require('../models/articles');
 const {decode}=require('html-entities');
 const { ARTICLES_SQL_QUERY } = require('../constants');
@@ -49,7 +49,7 @@ const getAllTags= asyncHandler(async(req,res)=>{
          
  let articles=await Articles.query(articlesQuery);
 
-articles=nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
+articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
   
         // decode html entities
    articles=articles.map((article)=>{

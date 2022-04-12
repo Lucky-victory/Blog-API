@@ -10,6 +10,7 @@ const BlogSchema=new Schema({name:"BlogSchema",fields:{
    authorId:String,
    category:String,
    slug:String,
+   tagId:String,
    views:Number,
    readTime:Number,
    heroImage:String,

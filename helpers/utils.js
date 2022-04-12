@@ -9,7 +9,7 @@ const Utils = {
       return hexId;
 
    },
-   nester(arr, nestedKeys, options = {}) {
+   Nester(arr, nestedKeys, options = {}) {
 
       const transformedObjs = arr.reduce((accum, item) => {
 const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
@@ -38,7 +38,7 @@ const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
       newObj[nestedTitle] = nestedObj;
       return [newObj];
    },
-   arrayBinder(outer, inner, options = {}) {
+   ArrayBinder(outer, inner, options = {}) {
       if (!(Array.isArray(outer) && Array.isArray(inner))) {
          return []
       }
@@ -62,7 +62,7 @@ const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
    const wordCount = String(words).match(wordMatchRegex).length;
    return { wordCount }
 },
-calculateReadTime(words) {
+CalculateReadTime(words) {
    const { wordCount } = Utils.matchWords(words);
    const rawReadTime = wordCount / 200;
    const minutes = parseInt(String(rawReadTime).split('.')[0]);
@@ -72,7 +72,7 @@ calculateReadTime(words) {
    const readTime = Math.ceil(minutes + seconds)||0;
    return { readTime };
 },
-generateSlug(title){
+GenerateSlug(title){
    const slugifyOptions={
       lower:true,
       strict:true,
@@ -101,7 +101,7 @@ StringToArray(str,seperator=','){
    if(Utils.NullOrUndefined(str)) return null;
 return String(str).split(seperator)
 },
-generateUsername(name){
+GenerateUsername(name){
    // generate random username
    const defaultUsername=randomWords({exactly:2,join:"-",maxLength:5});
    const slugifyOptions={
@@ -112,7 +112,7 @@ generateUsername(name){
   
 return (Utils.NullOrUndefined(name) ? slugify(defaultUsername,slugifyOptions) :slugify(name,slugifyOptions) )
 },
-stripKeysFromObj(obj={},keysArr=[]){
+RemoveKeysFromObj(obj={},keysArr=[]){
    const keysToDrop = {};
    for (let i = 0; i < keysArr.length; i++) {
       keysToDrop[keysArr[i]] = true;
@@ -127,6 +127,22 @@ stripKeysFromObj(obj={},keysArr=[]){
    }
    return newObj;
 
+},
+StringArrayToObjectArray(arr, propTitle = 'text') {
+   if (!NullOrUndefined(arr)) {
+    return ( arr.reduce((accum,item,index)=>{
+   const obj={[objTitle]:item}
+      accum.push(obj);
+      return accum;
+      },[]));
+   }
+   return null
+},
+AddPropsToObject(arrayOfObj, newProps) {
+   if (!NullOrUndefined(arrayOfObj)) {
+      return (arrayOfObj.map((item) => Object.assign(item, newProps)))
+
+   }
 }
 }
 

@@ -1,7 +1,7 @@
 "use strict";
 const Users=require("../models/users");
 const bcrypt=require("bcrypt");
-const { generateUsername, stripKeysFromObj, NullOrUndefined, isEmpty}=require("../helpers/utils");
+const { GenerateUsername, RemoveKeysFromObj, NullOrUndefined, isEmpty}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
 const { encode } = require("html-entities");
 const {Converter}= require("showdown");
@@ -21,7 +21,7 @@ const createUser= asyncHandler(async(req,res)=>{
        return res.status(400).json({message:"please provide the required fields",requiredFields:["fullname","email","password"],status:400});
 
     }
-    username=generateUsername(
+    username=GenerateUsername(
         !NullOrUndefined(username) && !isEmpty(username)?
         username : fullname
         );
@@ -82,7 +82,7 @@ try{
     
     }
     
-    req.user=stripKeysFromObj(user,['joinedAt','__createdtime__','__updatedtime__','password']);
+    req.user=RemoveKeysFromObj(user,['joinedAt','__createdtime__','__updatedtime__','password']);
     next();
 }
 catch(error){

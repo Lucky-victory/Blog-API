@@ -4,7 +4,7 @@ const Users=require("../models/users");
 const Comments=require("../models/comments");
 const Replies=require("../models/replies");
 const asyncHandler=require('express-async-handler');
-const { StringToArray, generateSlug, NullOrUndefined, isEmpty,arrayBinder, stripKeysFromObj} = require('../helpers/utils');
+const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj} = require('../helpers/utils');
 const { decode } = require('html-entities');
 
 // get a single article
@@ -35,7 +35,7 @@ const commentsId=comments.map((comment)=>comment.id);
 
 let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
 // combine comments with replies based on their related id
-comments=arrayBinder(comments,replies,{
+comments=ArrayBinder(comments,replies,{
    innerProp:"commentId",outerProp:"id",innerTitle:"replies"
 });
 // combine Articles with Comments based on their related id
@@ -68,10 +68,10 @@ const article=Articles.findOne({id:articleId})
       const {title,updateSlug}=req.body;
       const articleToUpdate=req.body || {};
       if(title && updateSlug){
-         articleToUpdate["slug"]=generateSlug(title);
+         articleToUpdate["slug"]=GenerateSlug(title);
          
       }
-      !NullOrUndefined(updateSlug) ? stripKeysFromObj(articleToUpdate,['updateSlug']) :"";
+      !NullOrUndefined(updateSlug) ? RemoveKeysFromObj(articleToUpdate,['updateSlug']) :"";
       articleToUpdate["id"]=articleId;
       articleToUpdate["modifiedAt"]=new Date().toISOString();
      const {update_hashes,skipped_hashes}= await Articles.update([articleToUpdate]);
