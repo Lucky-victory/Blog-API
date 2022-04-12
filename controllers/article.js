@@ -4,7 +4,7 @@ const Users=require("../models/users");
 const Comments=require("../models/comments");
 const Replies=require("../models/replies");
 const asyncHandler=require('express-async-handler');
-const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj} = require('../helpers/utils');
+const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj, ObjectArrayToStringArray} = require('../helpers/utils');
 const { decode } = require('html-entities');
 const Tags = require('../models/tags');
 const ArticleTags = require('../models/articleTags');
@@ -25,16 +25,19 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
 }
 
 const {title,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,readTime}=article;
-let {tags,content,intro}=article;
+let {content,intro}=article;
 content=decode(content);
-tags= StringToArray(tags);
 intro=decode(intro);
 let {fullname,twitter,linkedIn,profileImage,username,bio}=await Users.findOne({"id":authorId});
 bio=decode(bio);
-// query tags table
-const tagsQuery=await Tags.query(`SELECT tagId from BlogSchema.ArticleTags where postId='${id}'`);
-console.log(tagsQuery);
-const articleTagsQuery=await ArticleTags.query(`SELECT text from BlogSchema.Tags where id IN("${tagsQuery  }")`)
+// get tag ids from ArticleTags table where article id matches
+const tagIds=await ArticleTags.query(`SELECT tagId FROM BlogSchema.ArticleTags WHERE postId='${id}'`);
+
+// get tag(s) from Tags table with tagIds
+let tags=await Tags.query(`SELECT text FROM BlogSchema.Tags WHERE id IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
+// transfrom the object response into strings
+ tags=ObjectArrayToStringArray(tags);
+
 // query comments table with article id
 let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
 // get comment ids to query replies table;
@@ -49,7 +52,7 @@ comments=ArrayBinder(comments,replies,{
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,tags,intro,heroImage,id,category,author:{'id':authorId,fullname,twitter,linkedIn,profileImage,bio,username,readTime},comments});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,intro,heroImage,id,category,author:{'id':authorId,fullname,twitter,linkedIn,profileImage,bio,username,readTime, tags},comments});
 
 }
 catch(err){

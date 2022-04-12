@@ -145,6 +145,7 @@ AddPropsToObject(arrayOfObj, newProps) {
    }
 },
 ObjectArrayToStringArray(arrayOfObj) {
+   if(Utils.NullOrUndefined(arrayOfObj)) return [];
    return arrayOfObj.reduce((accum, item) => {
       for (let key in item) {
          accum.push(item[key])
