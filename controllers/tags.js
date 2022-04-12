@@ -49,7 +49,7 @@ const getAllTags= asyncHandler(async(req,res)=>{
 //         }
 let tagIds=await Tags.query(`SELECT id FROM BlogSchema.Tags WHERE text IN("${tag.join('","')}")`);
 console.log(tagIds);
-const postIds=await ArticleTags.query(`SELECT postId FROM BlogSchema.ArticleTags WHERE tagId IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
+const postIds=await ArticleTags.query(`SELECT DISTINCT postId FROM BlogSchema.ArticleTags WHERE tagId IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
 console.log(postIds);
 
         const articlesQuery=`${ARTICLES_SQL_QUERY} AND a.id IN("${ObjectArrayToStringArray(postIds).join('","')}") ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
