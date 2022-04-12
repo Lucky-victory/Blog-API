@@ -5,7 +5,6 @@ const Replies=require('../models/replies');
 
 const asyncHandler=require('express-async-handler');
 const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty}=require("../helpers/utils");
-const {Sqler}=require("harpee");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");

@@ -6,6 +6,8 @@ const Replies=require("../models/replies");
 const asyncHandler=require('express-async-handler');
 const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj} = require('../helpers/utils');
 const { decode } = require('html-entities');
+const Tags = require('../models/tags');
+const ArticleTags = require('../models/articleTags');
 
 // get a single article
 const getArticleBySlug= asyncHandler (async (req,res)=>{
@@ -21,6 +23,7 @@ const getArticleBySlug= asyncHandler (async (req,res)=>{
          res.status(404).json({message:`article with slug '${urlSlug}' was not found`,status:404});
    return  ;  
 }
+
 const {title,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,readTime}=article;
 let {tags,content,intro}=article;
 content=decode(content);
@@ -28,6 +31,10 @@ tags= StringToArray(tags);
 intro=decode(intro);
 let {fullname,twitter,linkedIn,profileImage,username,bio}=await Users.findOne({"id":authorId});
 bio=decode(bio);
+// query tags table
+const tagsQuery=await Tags.query(`SELECT tagId from BlogSchema.ArticleTags where postId='${id}'`);
+console.log(tagsQuery);
+const articleTagsQuery=await ArticleTags.query(`SELECT text from BlogSchema.Tags where id IN("${tagsQuery  }")`)
 // query comments table with article id
 let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
 // get comment ids to query replies table;

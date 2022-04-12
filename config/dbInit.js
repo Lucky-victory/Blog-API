@@ -5,14 +5,17 @@ const Users= require("../models/users");
 const Articles= require("../models/articles");
 const Comments= require("../models/comments");
 const Replies= require("../models/replies");
-const { CalculateReadTime, GenerateSlug } = require('../helpers/utils');
+const ArticleTags = require('../models/articleTags');
+const Tags = require('../models/tags');
 
-async function runDb(){
+async function initializeDB(){
 
     await Articles.init();
     await Users.init();
     await Comments.init();
     await Replies.init();
+    await ArticleTags.init();
+    await Tags.init();
     await Articles.createMany([
         {
         id:1,
@@ -111,6 +114,7 @@ await Users.createMany([{
     superUser:false
 }
 ]);
+
 await Comments.createMany([
     {
         id:1,
@@ -151,9 +155,46 @@ await Replies.createMany([
         userId:'user-45367'
     }
 ])
-    
+    await Tags.createMany([
+        {
+        id:1,
+        text:'coach',
+        createdAt:'2022-04-12T04:16:48.922Z'
+    },
+        {
+        id:2,
+        text:'men',
+        createdAt:'2022-04-12T04:16:48.922Z'
+    },
+        {
+        id:3,
+        text:'wives',
+        createdAt:'2022-04-12T04:16:48.922Z'
+    },
+
+]);
+await ArticleTags.createMany([
+    {
+        id:1,
+        tagId:3,
+        postId:2,
+        createdAt:'2022-04-12T04:16:48.922Z'
+    },
+        {
+        id:2,
+        tagId:1,
+        postId:3,
+        createdAt:'2022-04-12T04:16:48.922Z'
+    },
+        {
+        id:3,
+        tagId:2,
+        postId:1,
+        createdAt:'2022-04-12T04:16:48.922Z'
+    },
+])
 }
-runDb()
+initializeDB()
 
 
-module.exports=runDb;
+module.exports=initializeDB;
