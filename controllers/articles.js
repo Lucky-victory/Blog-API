@@ -4,7 +4,7 @@ const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
 const asyncHandler=require('express-async-handler');
-const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject}=require("../helpers/utils");
+const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
@@ -37,28 +37,15 @@ const getPublishedArticles=asyncHandler(async(req,res)=>{
   
 // get article ids to query comments table;
 const articlesId=articles.map((article)=>article.id);
- 
-let tagIds=await ArticleTags.query(`SELECT tagId FROM BlogSchema.ArticleTags WHERE postId IN("${articlesId.join('","')}")`);
-tagIds=ObjectArrayToStringArray(tagIds);
-
-let tags= await Tags.query(`SELECT text,id FROM BlogSchema.Tags WHERE id IN("${tagIds.join('","')}")`);
-console.log(tags);
-let r=tagIds.reduce((acc,a,i)=>{
- if(a ==tags[i].i){
-acc.push(tags[i])
- }
- return acc
-},[]);
-console.log(r);
     // decode html entities
     articles=articles.map((article)=>{
       article.title=decode(article.title);
       article.content=decode(article.content);
       article.intro=decode(article.intro);
-      article.author.bio=decode(article.author.bio);
-      
+      article.author.bio=decode(article.author.bio);      
      return article;
      });
+
 let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId IN ("${articlesId.join('","')}") ORDER BY createdAt DESC`);
 // get comment ids to query replies table;
 const commentsId=comments.map((comment)=>comment.id);
@@ -98,7 +85,8 @@ const createNewArticle=asyncHandler( async(req,res)=>{
          return;
       }
    let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content,intro }=req.body;
-      
+  
+
 if(!(title || content)){
 res.status(400).json({message:"provide at least `title` or `content` "});
 return
@@ -115,12 +103,17 @@ const authorId=req.userId;
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
       const {readTime}=CalculateReadTime(totalWords)
       const publishedAt=published? createdAt : null;
-      const newArticle= {createdAt,publishedAt,title,content,tags,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
+      const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
       
       
-      
-     const {inserted_hashes}=await Articles.create(newArticle);
-      res.status(201).json({status:201,message:"article successfully created","article":{id:inserted_hashes[0],...newArticle}})
+      tags=StringArrayToObjectArray(tags);
+      tags=AddPropsToObject(tags,{createdAt});
+     const {inserted_hashes:insertedArticleId}=await Articles.create(newArticle);
+let {inserted_hashes:insertedTagsId}=await Tags.createMany(tags);
+insertedTagsId=StringArrayToObjectArray(insertedTagsId,'tagId');
+const tagIdsWithArticleId=AddPropsToObject(insertedTagsId,{postId:insertedArticleId[0],createdAt})
+await ArticleTags.createMany(tagIdsWithArticleId)
+      res.status(201).json({status:201,message:"article successfully created","article":{id:insertedArticleId[0],...newArticle}})
    }
    catch(error){
       const status=error.status ||500;

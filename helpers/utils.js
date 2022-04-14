@@ -129,18 +129,24 @@ RemoveKeysFromObj(obj={},keysArr=[]){
 
 },
 StringArrayToObjectArray(arr, propTitle = 'text') {
-   if (!NullOrUndefined(arr)) {
-    return ( arr.reduce((accum,item,index)=>{
-   const obj={[objTitle]:item}
+   if (!Utils.NullOrUndefined(arr)) {
+      if(!Array.isArray(arr)){
+         arr=[arr];
+      }
+    return  arr.reduce((accum,item)=>{
+   const obj={[propTitle]:item};
       accum.push(obj);
       return accum;
-      },[]));
+      },[]);
    }
-   return null
+
 },
 AddPropsToObject(arrayOfObj, newProps) {
-   if (!NullOrUndefined(arrayOfObj)) {
-      return (arrayOfObj.map((item) => Object.assign(item, newProps)))
+   if (!Utils.NullOrUndefined(arrayOfObj)) {
+      if(!Array.isArray(newProps)){
+         newProps=[newProps];
+      }
+      return (arrayOfObj.map((item) => Object.assign(item, ...newProps)))
 
    }
 },
