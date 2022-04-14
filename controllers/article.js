@@ -28,8 +28,8 @@ const {title,publishedAt,modifiedAt,slug,heroImage,id,authorId,category,views,re
 let {content,intro}=article;
 content=decode(content);
 intro=decode(intro);
-let {fullname,twitter,linkedIn,profileImage,username,bio}=await Users.findOne({"id":authorId});
-bio=decode(bio);
+let author=await Users.findOne({"id":authorId},["fullname","twitter","linkedIn","id","username","profileImage","bio"]);
+author['bio']=decode(author['bio']);
 // get tag ids from ArticleTags table where article id matches
 const tagIds=await ArticleTags.query(`SELECT tagId FROM BlogSchema.ArticleTags WHERE postId='${id}'`);
 
@@ -52,7 +52,7 @@ comments=ArrayBinder(comments,replies,{
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,intro,heroImage,id,category,author:{'id':authorId,fullname,twitter,linkedIn,profileImage,bio,username,readTime, tags},comments});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,intro,heroImage,id,category,author,readTime, tags,comments});
 
 }
 catch(err){

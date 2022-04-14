@@ -4,7 +4,7 @@ const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
 const asyncHandler=require('express-async-handler');
-const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags}=require("../helpers/utils");
+const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
@@ -41,8 +41,8 @@ const articlesId=articles.map((article)=>article.id);
     articles=articles.map((article)=>{
       article.title=decode(article.title);
       article.content=decode(article.content);
-      article.intro=decode(article.intro);
-      article.author.bio=decode(article.author.bio);      
+      !NullOrUndefined(article.intro) ? article.intro=decode(article.intro) : '';
+      !NullOrUndefined(article.author && article.author.bio) ? article.author.bio=decode(article.author.bio) : '';      
      return article;
      });
 
@@ -96,29 +96,38 @@ content= converter.makeHtml(content);
 content=encode(content);
 intro=converter.makeHtml(intro);
 intro=encode(intro);
-const currentDate=new Date().toISOString();  
+const currentDate=GetLocalTime();  
 const createdAt=currentDate;
 const slug= GenerateSlug(title);
 const authorId=req.userId;
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
-      const {readTime}=CalculateReadTime(totalWords)
-      const publishedAt=published? createdAt : null;
-      const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
+const {readTime}=CalculateReadTime(totalWords)
+ const publishedAt=published? createdAt : null;
+ const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
       
      // try getting tags from database to see if they exist
-     const tagsExist=await Tags
-      tags=StringArrayToObjectArray(tags);
-      tags=AddPropsToObject(tags,{createdAt});
-     const {inserted_hashes:insertedArticleId}=await Articles.create(newArticle);
-let {inserted_hashes:insertedTagsId}=await Tags.createMany(tags);
-insertedTagsId=StringArrayToObjectArray(insertedTagsId,'tagId');
-const tagIdsWithArticleId=AddPropsToObject(insertedTagsId,{postId:insertedArticleId[0],createdAt})
-await ArticleTags.createMany(tagIdsWithArticleId)
+     const tagsExist=await Tags.find({getAttributes:["id","text"],where:`text IN("${tags.join('","')}")`});
+     let remainingTags=tags;
+     let duplicateTagsId;
+     if(tagsExist.length){
+        duplicateTagsId=GetIdOfDuplicateTags(tagsExist,tags);
+        remainingTags=RemoveDuplicateTags(tagsExist,tags);
+      }
+      let tagsAsObj=StringArrayToObjectArray(remainingTags);
+      tagsAsObj=AddPropsToObject(tagsAsObj,{createdAt});
+      
+      const {inserted_hashes:insertedArticleId}=await Articles.create(newArticle);
+      let {inserted_hashes:insertedTagsId}=await Tags.createMany(tagsAsObj);
+      let mergedTagIds=MergeArrays(insertedTagsId,duplicateTagsId);
+      mergedTagIds=StringArrayToObjectArray(mergedTagIds,'tagId');
+      const tagIdsWithArticleId=AddPropsToObject(mergedTagIds,{postId:insertedArticleId[0],createdAt})
+      await ArticleTags.createMany(tagIdsWithArticleId)
+
       res.status(201).json({status:201,message:"article successfully created","article":{id:insertedArticleId[0],...newArticle}})
    }
    catch(error){
       const status=error.status ||500;
-   res.status(status).json({message:"an error occurred, couldn't creaded new article",error,status})
+   res.status(status).json({message:"an error occurred, couldn't create new article",error,status})
 
    }
 });

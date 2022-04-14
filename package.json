@@ -15,7 +15,7 @@
       "dotenv": "^16.0.0",
       "express": "^4.17.2",
       "express-async-handler": "^1.2.0",
-      "harpee": "^3.0.9",
+      "harpee": "^3.0.12",
       "html-entities": "^2.3.2",
       "http-errors": "^2.0.0",
       "jsonwebtoken": "^8.5.1",

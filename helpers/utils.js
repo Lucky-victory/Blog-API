@@ -205,7 +205,7 @@ const Utils = {
     * @returns {(string | number)[] | []}
     **/
    GetIdOfDuplicateTags(prevTags, newTags) {
-   if(!Array.isArray(prevTags) && !Array.isArray(newTags)){
+   if(Array.isArray(prevTags) && Array.isArray(newTags)){
 
          const duplicateTagsIds = [];
          for (let i = 0; i < prevTags.length; i++) {
@@ -225,7 +225,7 @@ const Utils = {
     * @returns {string[] | []}
     **/
 RemoveDuplicateTags(prevTags, newTags) {
-   if(!Array.isArray(prevTags) && !Array.isArray(newTags)){
+   if(Array.isArray(prevTags) && Array.isArray(newTags)){
    let nonDuplicateTags = []; 
    const keysLeft = []
    for (let i = 0; i < prevTags.length; i++) {
@@ -247,6 +247,13 @@ MergeArrays(arr=[], arr2=[]) {
    const newArr = [];
    newArr.push(...arr, ...arr2)
    return newArr
+},
+GetLocalTime(){
+const timeZoneOffsetInHours=(new Date().getTimezoneOffset() / 60);
+const currentHour=new Date().getHours();
+const localDateTimeInMilliseconds=new Date().setHours(currentHour - timeZoneOffsetInHours);
+const localTime=new Date(localDateTimeInMilliseconds).toISOString();
+return localTime;
 }
 }
 

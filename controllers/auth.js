@@ -1,7 +1,7 @@
 "use strict";
 const Users=require("../models/users");
 const bcrypt=require("bcrypt");
-const { GenerateUsername, RemoveKeysFromObj, NullOrUndefined, isEmpty}=require("../helpers/utils");
+const { GenerateUsername, RemoveKeysFromObj, NullOrUndefined, isEmpty, GetLocalTime, GenerateUserID}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
 const { encode } = require("html-entities");
 const {Converter}= require("showdown");
@@ -38,8 +38,8 @@ const usernameExist= await Users.findOne({username});
 if(usernameExist){
 return res.status(400).json({message:`'${username}' have been taken`});
 }
-const joinedAt=new Date().toISOString();
-const newUser= {profileImage,bio,twitter,linkedIn,joinedAt,username,fullname,email,superUser:false,github};
+const joinedAt=GetLocalTime();
+const newUser= {id:GenerateUserID(), profileImage,bio,twitter,linkedIn,joinedAt,username,fullname,email,superUser:false,github};
 
 // hash the password before storing in database
 try{
@@ -77,7 +77,7 @@ try{
     }
     const passwordMatch= await bcrypt.compare(String(password),user.password);
         
-    if(user && !passwordMatch){
+    if(!passwordMatch){
      return res.status(400).json({message:"invalid credentials",status:400});
     
     }
