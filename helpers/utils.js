@@ -112,6 +112,10 @@ GenerateUsername(name){
   
 return (Utils.NullOrUndefined(name) ? slugify(defaultUsername,slugifyOptions) :slugify(name,slugifyOptions) )
 },
+GenerateUserID(prefix='user',suffix=''){
+   const randomNumber=Math.floor(Math.random() * 1E9);
+   return `${prefix}-${randomNumber}-${suffix}`;
+},
 RemoveKeysFromObj(obj={},keysArr=[]){
    const keysToDrop = {};
    for (let i = 0; i < keysArr.length; i++) {

@@ -117,7 +117,7 @@ await ArticleTags.createMany(tagIdsWithArticleId)
    }
    catch(error){
       const status=error.status ||500;
-   res.status(status).json({message:"an error occurred",error,status})
+   res.status(status).json({message:"an error occurred, couldn't creaded new article",error,status})
 
    }
 });
