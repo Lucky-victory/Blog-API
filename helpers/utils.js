@@ -1,6 +1,6 @@
-const slugify=require('slugify');
-const shortId=require('shortid');
-const randomWords=require("random-words");
+const slugify = require('slugify');
+const shortId = require('shortid');
+const randomWords = require("random-words");
 
 
 const Utils = {
@@ -12,7 +12,7 @@ const Utils = {
    Nester(arr, nestedKeys, options = {}) {
 
       const transformedObjs = arr.reduce((accum, item) => {
-const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
+         const arrayOfObj = Utils.selectKeys(item, nestedKeys, options);
          accum.push(...arrayOfObj);
          return accum;
       }, []);
@@ -58,110 +58,195 @@ const arrayOfObj=Utils.selectKeys(item,nestedKeys,options);
 
    },
    matchWords(words) {
-   const wordMatchRegex = /(\w+)/g;
-   const wordCount = String(words).match(wordMatchRegex).length;
-   return { wordCount }
-},
-CalculateReadTime(words) {
-   const { wordCount } = Utils.matchWords(words);
-   const rawReadTime = wordCount / 200;
-   const minutes = parseInt(String(rawReadTime).split('.')[0]);
+      const wordMatchRegex = /(\w+)/g;
+      const wordCount = String(words).match(wordMatchRegex).length;
+      return { wordCount }
+   },
+   CalculateReadTime(words) {
+      const { wordCount } = Utils.matchWords(words);
+      const rawReadTime = wordCount / 200;
+      const minutes = parseInt(String(rawReadTime).split('.')[0]);
 
-   let seconds = '.' + String(rawReadTime).split('.')[1];
-   seconds = seconds * .60;
-   const readTime = Math.ceil(minutes + seconds)||0;
-   return { readTime };
-},
-GenerateSlug(title){
-   const slugifyOptions={
-      lower:true,
-      strict:true,
-      remove:/[*+~.()'"!:@]/g
-   }
-   const slug=title ? slugify(title+' '+shortId(),slugifyOptions) : null;
-   return slug;
-},
-isEmpty(arg){
-return (
-   (!Utils.NullOrUndefined(arg) && !Object.keys(arg).length) || (!Utils.NullOrUndefined(arg) && arg==='')
-   );
-},
+      let seconds = '.' + String(rawReadTime).split('.')[1];
+      seconds = seconds * .60;
+      const readTime = Math.ceil(minutes + seconds) || 0;
+      return { readTime };
+   },
+   GenerateSlug(title) {
+      const slugifyOptions = {
+         lower: true,
+         strict: true,
+         remove: /[*+~.()'"!:@]/g
+      }
+      const slug = title ? slugify(title + ' ' + shortId(), slugifyOptions) : null;
+      return slug;
+   },
+   isEmpty(arg) {
+      return (
+         (!Utils.NullOrUndefined(arg) && !Object.keys(arg).length) || (!Utils.NullOrUndefined(arg) && arg === '')
+      );
+   },
 
-NotNullOrUndefined(val){
-if(!Utils.NullOrUndefined(val)) return val;
-},
+   NotNullOrUndefined(val) {
+      if (!Utils.NullOrUndefined(val)) return val;
+   },
 
-NullOrUndefined(val){
-  return( 
-     Object.prototype.toString.call(val) =='[object Null]' ||
-     Object.prototype.toString.call(val) =='[object Undefined]');
-},
+   NullOrUndefined(val) {
+      return (
+         Object.prototype.toString.call(val) == '[object Null]' ||
+         Object.prototype.toString.call(val) == '[object Undefined]');
+   },
 
-StringToArray(str,seperator=','){
-   if(Utils.NullOrUndefined(str)) return null;
-return String(str).split(seperator)
-},
-GenerateUsername(name){
-   // generate random username
-   const defaultUsername=randomWords({exactly:2,join:"-",maxLength:5});
-   const slugifyOptions={
-      lower:true,
-      strict:true,
-      remove:/[*+~.()'"!:@]/g
-   }
+   StringToArray(str, seperator = ',') {
+      if (Utils.NullOrUndefined(str)) return null;
+      return String(str).split(seperator)
+   },
+   /**
+    * @param {string} name
+    * @returns {string}
+    * @example lucy-vine
+    * **/
   
-return (Utils.NullOrUndefined(name) ? slugify(defaultUsername,slugifyOptions) :slugify(name,slugifyOptions) )
-},
-GenerateUserID(prefix='user',suffix=''){
-   const randomNumber=Math.floor(Math.random() * 1E9);
-   return `${prefix}-${randomNumber}-${suffix}`;
-},
-RemoveKeysFromObj(obj={},keysArr=[]){
-   const keysToDrop = {};
-   for (let i = 0; i < keysArr.length; i++) {
-      keysToDrop[keysArr[i]] = true;
-   }
-   const newObj = {};
-   for (const key in obj) {
-
-      if (keysToDrop[key] || !obj.hasOwnProperty(key)) {
-         continue;
+   GenerateUsername(name) {
+      // generate random username
+      const defaultUsername = randomWords({ exactly: 2, join: "-", maxLength: 5 });
+      const slugifyOptions = {
+         lower: true,
+         strict: true,
+         remove: /[*+~.()'"!:@]/g
       }
-      newObj[key] = obj[key];
-   }
-   return newObj;
 
-},
-StringArrayToObjectArray(arr, propTitle = 'text') {
-   if (!Utils.NullOrUndefined(arr)) {
-      if(!Array.isArray(arr)){
-         arr=[arr];
+      return (Utils.NullOrUndefined(name) ? slugify(defaultUsername, slugifyOptions) : slugify(name, slugifyOptions))
+   },
+    /**
+    * @param {string} [prefix]
+    * @param {string} [suffix]
+    * @returns {string}
+    * @example user-12345678
+    * **/
+  
+   GenerateUserID(prefix = 'user', suffix = '') {
+      const randomNumber = Math.floor(Math.random() * 1E9);
+      return `${prefix}-${randomNumber}-${suffix}`;
+   },
+    /**
+    * @param {{[key:string]:any}} obj
+    * @param {string[]} keysArr
+    * @returns {{[key:string]:any}}
+    * **/
+  
+   RemoveKeysFromObj(obj = {}, keysArr = []) {
+      const keysToDrop = {};
+      for (let i = 0; i < keysArr.length; i++) {
+         keysToDrop[keysArr[i]] = true;
       }
-    return  arr.reduce((accum,item)=>{
-   const obj={[propTitle]:item};
-      accum.push(obj);
-      return accum;
-      },[]);
-   }
+      const newObj = {};
+      for (const key in obj) {
 
-},
-AddPropsToObject(arrayOfObj, newProps) {
-   if (!Utils.NullOrUndefined(arrayOfObj)) {
-      if(!Array.isArray(newProps)){
-         newProps=[newProps];
+         if (keysToDrop[key] || !obj.hasOwnProperty(key)) {
+            continue;
+         }
+         newObj[key] = obj[key];
       }
-      return (arrayOfObj.map((item) => Object.assign(item, ...newProps)))
+      return newObj;
+
+   },
+    /**
+    * @param {string[]} arr
+    * @param {string} propTitle
+    * @returns {{[key:string]:any}[]}
+    * **/
+  
+   StringArrayToObjectArray(arr, propTitle = 'text') {
+      if (!Utils.NullOrUndefined(arr)) {
+         if (!Array.isArray(arr)) {
+            arr = [arr];
+         }
+         return arr.reduce((accum, item) => {
+            const obj = {
+               [propTitle]: item };
+            accum.push(obj);
+            return accum;
+         }, []);
+      }
+
+   },
+    /**
+    * @param {{[key:string]:any}[]} arrayOfObj
+    * @param {{[key:string]:any}[]} newProps
+    * @returns {{[key:string]:any}[]}
+    * **/
+  
+   AddPropsToObject(arrayOfObj, newProps) {
+      if (!Utils.NullOrUndefined(arrayOfObj)) {
+         if (!Array.isArray(newProps)) {
+            newProps = [newProps];
+         }
+         return (arrayOfObj.map((item) => Object.assign(item, ...newProps)))
+
+      }
+   },
+   /**
+    * @param {{[key:string]:any}[]} arrayOfObj
+    * @returns {string[]}
+    * **/
+   ObjectArrayToStringArray(arrayOfObj) {
+      if (!Array.isArray(arrayOfObj)) return [];
+      return arrayOfObj.reduce((accum, item) => {
+         for (let key in item) {
+            accum.push(item[key])
+         }
+         return accum;
+      }, [])
+   },
+   /**
+    * @param {{id:(string | number),text:string}[]} prevTags
+    * @param {string[]} newTags
+    * @returns {(string | number)[] | []}
+    **/
+   GetIdOfDuplicateTags(prevTags, newTags) {
+   if(!Array.isArray(prevTags) && !Array.isArray(newTags)){
+
+         const duplicateTagsIds = [];
+         for (let i = 0; i < prevTags.length; i++) {
+            if (newTags.includes(prevTags[i].text)) {
+               duplicateTagsIds.push(prevTags[i].id)
+            }
+         }
+         return duplicateTagsIds
+      }
+      return [];
+   },
+   
+    /**
+     * Removes duplicate tags and returns the rest;
+    * @param {{id?:(string | number),text:string}[]} prevTags
+    * @param {string[]} newTags
+    * @returns {string[] | []}
+    **/
+RemoveDuplicateTags(prevTags, newTags) {
+   if(!Array.isArray(prevTags) && !Array.isArray(newTags)){
+   let nonDuplicateTags = []; 
+   const keysLeft = []
+   for (let i = 0; i < prevTags.length; i++) {
+      keysLeft.push(Utils.RemoveKeysFromObj(prevTags[i], ['id']));
 
    }
-},
-ObjectArrayToStringArray(arrayOfObj) {
-   if(Utils.NullOrUndefined(arrayOfObj)) return [];
-   return arrayOfObj.reduce((accum, item) => {
-      for (let key in item) {
-         accum.push(item[key])
+   const valuesOfKeysLeft = Utils.ObjectArrayToStringArray(keysLeft);
+   nonDuplicateTags = newTags.reduce((accum, newTag) => {
+      if (!valuesOfKeysLeft.includes(newTag)) {
+         accum.push(newTag)
       }
       return accum;
    }, [])
+   return nonDuplicateTags
+   }
+   return [];
+},
+MergeArrays(arr=[], arr2=[]) {
+   const newArr = [];
+   newArr.push(...arr, ...arr2)
+   return newArr
 }
 }
 
