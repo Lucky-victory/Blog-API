@@ -4,7 +4,7 @@ const Comments=require('../models/comments');
 const Replies=require('../models/replies');
 
 const asyncHandler=require('express-async-handler');
-const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray}=require("../helpers/utils");
+const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
@@ -105,7 +105,8 @@ const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)
       const publishedAt=published? createdAt : null;
       const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
       
-      
+     // try getting tags from database to see if they exist
+     const tagsExist=await Tags
       tags=StringArrayToObjectArray(tags);
       tags=AddPropsToObject(tags,{createdAt});
      const {inserted_hashes:insertedArticleId}=await Articles.create(newArticle);
