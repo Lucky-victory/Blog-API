@@ -1,4 +1,4 @@
-
+// use environment variables
 require('dotenv').config();
 const express=require('express');
 const app=express();
@@ -9,27 +9,27 @@ const fs=require('fs');
 const path=require('path');
 const morgan=require("morgan");
 const { IS_DEV } = require('./constants');
-const connectDB=require('./config/db');
+const connectDB=require('./config/db.co');
 connectDB();
 
 
-app.use(cookieParser())
-app.use(morgan("dev"))
+app.use(cookieParser());
+app.use(morgan("dev"));
 // middleware to accept json body requests.
 app.use(express.json());
-// middleware to accept a form 
+// middleware to accept a url-encoded body
 app.use(express.urlencoded({extended:false}));
 
 // articles route
-const articlesRouter=require('./routes/articles');
+const articlesRouter=require('./routes/articles.route');
 // single article route
-const articleRouter=require('./routes/article');
+const articleRouter=require('./routes/article.route');
 // users route
-const usersRouter=require("./routes/users");
+const usersRouter=require("./routes/users.route");
 const profileRouter=require("./routes/profile");
-const tagsRouter=require('./routes/tags');
-const categoryRouter=require('./routes/category');
-const authorRouter=require('./routes/author');
+const tagsRouter=require('./routes/tags.route');
+const categoryRouter=require('./routes/category.route');
+const authorRouter=require('./routes/author.route');
 
 app.use('/articles',articlesRouter);
 app.use('/article',articleRouter);

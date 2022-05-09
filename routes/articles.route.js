@@ -1,7 +1,7 @@
 const router=require('express').Router();
-const { getPublishedArticles,createNewArticle}=require('../controllers/articles');
+const { getPublishedArticles,createNewArticle}=require('../controllers/articles.controller');
 const cors=require("cors");
-const { editArticle, deleteArticle } = require('../controllers/article');
+const { editArticle, deleteArticle } = require('../controllers/article.controller');
 const { authenticateUser } = require('../middlewares/auth');
 const { csrfProtect } = require('../middlewares/csrf-protect');
 

@@ -1,4 +1,4 @@
-const { getCategories,getArticlesByCategory} = require('../controllers/category');
+const { getCategories,getArticlesByCategory} = require('../controllers/category.controller');
 const cors=require("cors");
 const router=require('express').Router();
 

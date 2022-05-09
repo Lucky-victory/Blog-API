@@ -158,8 +158,7 @@ const Utils = {
     * **/
   
    StringArrayToObjectArray(arr, propTitle = 'text') {
-      if (!Utils.NullOrUndefined(arr)) {
-         if (!Array.isArray(arr)) {
+      if (!Utils.NullOrUndefined(arr) && !Array.isArray(arr)) {
             arr = [arr];
          }
          return arr.reduce((accum, item) => {
@@ -168,7 +167,7 @@ const Utils = {
             accum.push(obj);
             return accum;
          }, []);
-      }
+      
 
    },
     /**
@@ -191,14 +190,23 @@ const Utils = {
     * @returns {string[]}
     * **/
    ObjectArrayToStringArray(arrayOfObj) {
-      if (!Array.isArray(arrayOfObj)) return [];
+      if (!Array.isArray(arrayOfObj)) return arrayOfObj;
       return arrayOfObj.reduce((accum, item) => {
+         if(!Utils.isObject(item)){
+            return item
+         }
          for (let key in item) {
             accum.push(item[key])
          }
          return accum;
       }, [])
    },
+   /**
+    * check if value is an object.
+    * */
+    isObject(value){
+       return (Object.prototype.toString.call(value) =='[object Object]');
+    },
    /**
     * @param {{id:(string | number),text:string}[]} prevTags
     * @param {string[]} newTags
@@ -208,9 +216,9 @@ const Utils = {
    if(Array.isArray(prevTags) && Array.isArray(newTags)){
 
          const duplicateTagsIds = [];
-         for (let i = 0; i < prevTags.length; i++) {
-            if (newTags.includes(prevTags[i].text)) {
-               duplicateTagsIds.push(prevTags[i].id)
+         for (let prevTag of prevTags) {
+            if (newTags.includes(prevTag.text)) {
+               duplicateTagsIds.push(prevTags.id)
             }
          }
          return duplicateTagsIds
@@ -228,14 +236,14 @@ RemoveDuplicateTags(prevTags, newTags) {
    if(Array.isArray(prevTags) && Array.isArray(newTags)){
    let nonDuplicateTags = []; 
    const keysLeft = []
-   for (let i = 0; i < prevTags.length; i++) {
-      keysLeft.push(Utils.RemoveKeysFromObj(prevTags[i], ['id']));
+   for (let prevTag of prevTags) {
+      keysLeft.push(Utils.RemoveKeysFromObj(prevTag, ['id']));
 
    }
    const valuesOfKeysLeft = Utils.ObjectArrayToStringArray(keysLeft);
    nonDuplicateTags = newTags.reduce((accum, newTag) => {
       if (!valuesOfKeysLeft.includes(newTag)) {
-         accum.push(newTag)
+         accum.push(newTag);
       }
       return accum;
    }, [])
@@ -248,6 +256,9 @@ MergeArrays(arr=[], arr2=[]) {
    newArr.push(...arr, ...arr2)
    return newArr
 },
+/**
+ * get local time in ISO String
+ * */
 GetLocalTime(){
 const timeZoneOffsetInHours=(new Date().getTimezoneOffset() / 60);
 const currentHour=new Date().getHours();

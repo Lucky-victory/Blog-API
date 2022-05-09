@@ -7,6 +7,7 @@ const BlogSchema=new Schema({name:"BlogSchema",fields:{
    createdAt:Date,
    modifiedAt:Date,
    userId:String,
+   status:String,
 },silent:true,primaryKey:'id'});
 
 const Comments=new Model("Comments",BlogSchema);

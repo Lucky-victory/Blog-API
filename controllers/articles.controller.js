@@ -1,7 +1,7 @@
 'use strict';
-const Articles=require('../models/articles');
-const Comments=require('../models/comments');
-const Replies=require('../models/replies');
+const Articles=require('../models/articles.model');
+const Comments=require('../models/comments.model');
+const Replies=require('../models/replies.model');
 
 const asyncHandler=require('express-async-handler');
 const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime}=require("../helpers/utils");
@@ -9,8 +9,8 @@ const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
 const { ARTICLES_SQL_QUERY } = require('../constants');
-const ArticleTags = require('../models/articleTags');
-const Tags = require('../models/tags');
+const ArticleTags = require('../models/articleTags.model');
+const Tags = require('../models/tags.model');
 
 
 const getPublishedArticles=asyncHandler(async(req,res)=>{
@@ -78,7 +78,7 @@ if(!articles.length){
 const createNewArticle=asyncHandler( async(req,res)=>{
    try{
 
-      if(!req.isAuthenticated) return res.status(403).json({message:'Unathorized, you cant add an article',status:403});
+      if(!req.isAuthenticated) return res.status(403).json({message:"Unathorized, not logged in, you can't add an article",status:403});
 
       if(isEmpty(req.body)){
          res.status(400).json({message:"Please include article to add",status:400})

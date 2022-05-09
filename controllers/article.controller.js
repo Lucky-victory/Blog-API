@@ -1,13 +1,13 @@
 
-const Articles=require('../models/articles');
-const Users=require("../models/users");
-const Comments=require("../models/comments");
-const Replies=require("../models/replies");
+const Articles=require('../models/articles.model');
+const Users=require("../models/users.model");
+const Comments=require("../models/comments.model");
+const Replies=require("../models/replies.model");
 const asyncHandler=require('express-async-handler');
-const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj, ObjectArrayToStringArray} = require('../helpers/utils');
+const Tags = require('../models/tags.model');
+const ArticleTags = require('../models/articleTags.model');
+const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj, ObjectArrayToStringArray,GetLocalTime} = require('../helpers/utils');
 const { decode } = require('html-entities');
-const Tags = require('../models/tags');
-const ArticleTags = require('../models/articleTags');
 
 // get a single article
 const getArticleBySlug= asyncHandler (async (req,res)=>{
@@ -68,13 +68,20 @@ const editArticle=asyncHandler (async(req,res)=>{
       const {userId,superUser}=req;
    
       const {articleId}=req.params;
-      if(!articleId) return res.status(400).json({message:"No article id provided",status:400});
 const article=Articles.findOne({id:articleId})
+ if(!article){
+        res.status(404).json({"status":404,message:`article with id '${articleId}' was not found`})
+      return
+     }
+    
       if(article.authorId != userId && !superUser) return res.status(401).json({message:'Unathorized, you can\'t edit this article',status:401});
 
       
    if(isEmpty(req.body)) return res.status(400).json({message:"Nothing to update, body not provided",status:400});
       
+      // the updateSlug property is to decide whether to update the slug when the title gets updated, 
+      // updating a slug would cause 404 errors for shared links
+     // this is why i made slug update optional
       const {title,updateSlug}=req.body;
       const articleToUpdate=req.body || {};
       if(title && updateSlug){
@@ -83,12 +90,9 @@ const article=Articles.findOne({id:articleId})
       }
       !NullOrUndefined(updateSlug) ? RemoveKeysFromObj(articleToUpdate,['updateSlug']) :"";
       articleToUpdate["id"]=articleId;
-      articleToUpdate["modifiedAt"]=new Date().toISOString();
-     const {update_hashes,skipped_hashes}= await Articles.update([articleToUpdate]);
-     if(skipped_hashes[0]){
-        res.status(404).json({"status":404,message:`article with id ${skipped_hashes[0]} was not found`})
-      return
-     }
+      articleToUpdate["modifiedAt"]=GetLocalTime();
+     const {update_hashes}= await Articles.update([articleToUpdate]);
+    
       res.status(200).json({"status":200,message:`sucessfully updated article with id ${update_hashes[0]}`})
    }
    catch(err){
@@ -102,16 +106,15 @@ const deleteArticle=asyncHandler(async(req,res)=>{
    try{
 
       const {articleId}=req.params;
-      if(!articleId){
-     res.status(400).json({message:"No article id provided",status:400});
-     return
-   }
-   const {deleted_hashes,skipped_hashes}=await Articles.findByIdAndRemove([articleId]);
-   if(skipped_hashes[0]){
+  const article= await Articles.findOne({id:articleId});
+    if(!article){
 
-      res.status(404).json({message:`article with id '${skipped_hashes[0]}' was not found`,status:404});
+      res.status(404).json({message:`article with id '${articleId}' was not found`,status:404});
       return;
    }
+  
+   const {deleted_hashes}=await Articles.findByIdAndRemove([articleId]);
+  
    res.status(200).json({message:`sucessfully deleted article with id ${deleted_hashes[0]}`,status:200});
 }
 catch(err){

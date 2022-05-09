@@ -13,6 +13,8 @@ const BlogSchema=new Schema({name:"BlogSchema",fields:{
    readTime:Number,
    heroImage:String,
    intro:String,
+   excerpt:String,
+   status:String,
    published:Boolean
 },silent:true,primaryKey:'id'});
 

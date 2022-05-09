@@ -47,7 +47,6 @@ const getCategories=asyncHandler(async(req,res)=>{
    article.title=decode(article.title);
    article.content=decode(article.content);
    article.intro=decode(article.intro);
-   article.tags=StringToArray(article.tags);
     article.author.bio=decode(article.author.bio);
   return article;
   });
