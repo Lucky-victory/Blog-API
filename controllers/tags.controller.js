@@ -1,10 +1,10 @@
 const asyncHandler=require('express-async-handler');
 const {NullOrUndefined,StringToArray,Nester, ObjectArrayToStringArray}=require('../helpers/utils');
-const Articles=require('../models/articles');
+const Articles=require('../models/articles.model');
 const {decode}=require('html-entities');
 const { ARTICLES_SQL_QUERY } = require('../constants');
-const Tags = require('../models/tags');
-const ArticleTags = require('../models/articleTags');
+const Tags = require('../models/tags.model');
+const ArticleTags = require('../models/articleTags.model');
 
 // Get all article tags
 const getAllTags= asyncHandler(async(req,res)=>{

@@ -9,7 +9,7 @@ const fs=require('fs');
 const path=require('path');
 const morgan=require("morgan");
 const { IS_DEV } = require('./constants');
-const connectDB=require('./config/db.co');
+const connectDB=require('./config/db.config');
 connectDB();
 
 
@@ -26,7 +26,7 @@ const articlesRouter=require('./routes/articles.route');
 const articleRouter=require('./routes/article.route');
 // users route
 const usersRouter=require("./routes/users.route");
-const profileRouter=require("./routes/profile");
+const profileRouter=require("./routes/profile.route");
 const tagsRouter=require('./routes/tags.route');
 const categoryRouter=require('./routes/category.route');
 const authorRouter=require('./routes/author.route');

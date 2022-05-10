@@ -1,7 +1,7 @@
 const asyncHandler=require('express-async-handler');
-const {Nester,NullOrUndefined,StringToArray, NotNullOrUndefined}=require('../helpers/utils');
+const {Nester,NullOrUndefined,StringToArray, NotNullOrUndefined, ObjectArrayToStringArray}=require('../helpers/utils');
 const {decode}=require('html-entities');
-const Articles=require('../models/articles');
+const Articles=require('../models/articles.model');
 const { ARTICLES_SQL_QUERY } = require('../constants');
 // Get all article categories
 const getCategories=asyncHandler(async(req,res)=>{
@@ -12,7 +12,7 @@ const getCategories=asyncHandler(async(req,res)=>{
        page=parseInt(page) ||1;
     let offset=(limit * (page - 1)) || 0;
        let categories=await Articles.query(`SELECT DISTINCT category FROM BlogSchema.Articles ${limit} ${offset}`);
-       categories=[...categories.reduce((accum,c)=>{!NullOrUndefined(c.category) ? accum.push(c.category):accum; return accum},[])]
+       categories=ObjectArrayToStringArray(categories);
        res.status(200).json({message:"Categories retrieved",status:200,categories})
     }
     catch(error){

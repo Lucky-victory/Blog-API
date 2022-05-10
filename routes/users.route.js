@@ -1,6 +1,6 @@
 const router=require("express").Router();
 
-const {createUser,loginUser,deleteUser}=require("../controllers/auth");
+const {createUser,loginUser,deleteUser}=require("../controllers/auth.controller");
 const {setAuth,authenticateUser, getUserProfile,destroyAuth}=require("../middlewares/auth");
 
 router.post("/register",createUser);

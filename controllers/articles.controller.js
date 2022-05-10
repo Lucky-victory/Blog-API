@@ -32,7 +32,7 @@ const getPublishedArticles=asyncHandler(async(req,res)=>{
 
       let articles=await Articles.query(articlesQuery);
       // nest author info as author property
-      articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
+      articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedIn","_username","_profileImage"],{nestedTitle:"author"});
 
   
 // get article ids to query comments table;
@@ -46,20 +46,30 @@ const articlesId=articles.map((article)=>article.id);
      return article;
      });
 
-let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId IN ("${articlesId.join('","')}") ORDER BY createdAt DESC`);
-// get comment ids to query replies table;
-const commentsId=comments.map((comment)=>comment.id);
+const comments= await Comments.query(`SELECT count(id) as commentsCount,postId FROM BlogSchema.Comments WHERE postId IN ("${articlesId.join('","')}") GROUP BY postId`);
+// // get comment ids to query replies table;
+// const commentsId=comments.map((comment)=>comment.id);
 
-let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
-// combine comments with replies based on their related id
-comments=ArrayBinder(comments,replies,{
-   innerProp:"commentId",outerProp:"id",innerTitle:"replies"
-});
+// let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
+// // combine comments with replies based on their related id
+// comments=ArrayBinder(comments,replies,{
+//    innerProp:"commentId",outerProp:"id",innerTitle:"replies"
+// });
 // combine Articles with Comments based on their related id
-articles=ArrayBinder(articles,comments,{
-   outerProp:"id",innerProp:"postId",innerTitle:"comments"
-});
+// articles=ArrayBinder(articles,comments,{
+//    outerProp:"id",innerProp:"postId",innerTitle:"comments"
+// });
+for(let article of articles){
+for(let comment of comments){
+if(!article.id ==comment.postId){
+   article['commentsCount']=0;
+   continue}
+   else{
+   article['commentsCount']=comment.commentsCount;
+}
 
+}
+}
 if(!articles.length){
          res.status(200).json({message:"No Articles","articles":[]})
          return

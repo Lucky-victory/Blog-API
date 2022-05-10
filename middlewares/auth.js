@@ -1,6 +1,6 @@
 
 const asyncHandler=require("express-async-handler");
-const Users=require("../models/users");
+const Users=require("../models/users.model");
 const { getJwtFromCookies,verifyToken,generateToken,setJwtToCookies } = require("../helpers/auth");
 const { NotNullOrUndefined } = require("../helpers/utils");
 const { decode } = require("html-entities");

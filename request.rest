@@ -1,6 +1,9 @@
 GET https://4901-luckyvictory-blogapi-pzfdy6iu340.ws-eu38.gitpod.io/profile/land-promised-c11c
 
 ###
+GET https://4456-luckyvictory-blogapi-p53jn01vcuc.ws-eu44.gitpod.io/articles
+
+###
 POST https://4456-luckyvictory-blogapi-svs509lbcd6.ws-eu38.gitpod.io/articles/create
 Content-Type: application/json
 

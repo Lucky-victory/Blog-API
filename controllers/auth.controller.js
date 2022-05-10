@@ -1,5 +1,5 @@
 "use strict";
-const Users=require("../models/users");
+const Users=require("../models/users.model");
 const bcrypt=require("bcrypt");
 const { GenerateUsername, RemoveKeysFromObj, NullOrUndefined, isEmpty, GetLocalTime, GenerateUserID}=require("../helpers/utils");
 const asyncHandler=require("express-async-handler");
