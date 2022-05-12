@@ -2,29 +2,21 @@ const asyncHandler=require('express-async-handler');
 const {Nester,NullOrUndefined,StringToArray}=require('../helpers/utils');
 const {decode}=require('html-entities');
 const Articles=require('../models/articles.model');
-const { ARTICLES_SQL_QUERY } = require('../constants');
+const { ARTICLES_SQL_QUERY, SORT_LISTS,ACCEPTABLE_SORT_NAMES } = require('../constants');
 
-const defaultSorts={
-   'popular':'views|desc',
-   'latest':'publishedAt|desc',
-   'short':'readTime|desc',
-   'long':'readTime|asc'
-}
-const sortTypes=['desc','asc'];
-const acceptableSorts=['popular','latest','short','long'];
 
 const getArticlesByAuthor=asyncHandler(async(req,res)=>{
     try{
        let {page,sort}=req.query;
-       if(acceptableSorts.indexOf(sort) == -1){
-      sort=defaultSorts['popular'];
+       if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
+      sort=SORT_LISTS[sort];
        }
        else{
-          sort=defaultSorts[sort];
+          sort=SORT_LISTS[ACCEPTABLE_SORT_NAMES[0]];
        }
        const {author}=req.params;
        const orderBy=StringToArray(sort,'|')[0];
-       const order=StringToArray(sort,'|')[1] ||'desc';
+       const order=StringToArray(sort,'|')[1];
      const  limit=20;
        page=parseInt(page) ||1;
     let offset=(limit * (page - 1)) ||0;

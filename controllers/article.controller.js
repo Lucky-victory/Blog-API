@@ -6,7 +6,7 @@ const Replies=require("../models/replies.model");
 const asyncHandler=require('express-async-handler');
 const Tags = require('../models/tags.model');
 const ArticleTags = require('../models/articleTags.model');
-const { StringToArray, GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj, ObjectArrayToStringArray,GetLocalTime} = require('../helpers/utils');
+const {  GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj, ObjectArrayToStringArray,GetLocalTime} = require('../helpers/utils');
 const { decode } = require('html-entities');
 
 // get a single article

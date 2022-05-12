@@ -1,23 +1,28 @@
 'use strict';
 const Articles=require('../models/articles.model');
 const Comments=require('../models/comments.model');
-const Replies=require('../models/replies.model');
-
 const asyncHandler=require('express-async-handler');
-const {Nester,ArrayBinder,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty, ObjectArrayToStringArray, AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime}=require("../helpers/utils");
+const {Nester,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty,  AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
-const { ARTICLES_SQL_QUERY } = require('../constants');
+const { ARTICLES_SQL_QUERY,ACCEPTABLE_SORT_NAMES,SORT_LISTS} = require('../constants');
 const ArticleTags = require('../models/articleTags.model');
 const Tags = require('../models/tags.model');
 
 
 const getPublishedArticles=asyncHandler(async(req,res)=>{
    try{
-      let {page,category,sort='publishedAt|desc'}=req.query;
-      const orderBy=StringToArray(sort,'|')[0];
-      const order=StringToArray(sort,'|')[1] ||'desc';
+      let {page,category,sort}=req.query;
+      if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
+         sort=SORT_LISTS[sort];
+          }
+          else{
+             sort=SORT_LISTS[ACCEPTABLE_SORT_NAMES[0]];
+          }
+
+          const orderBy=StringToArray(sort,'|')[0];
+          const order=StringToArray(sort,'|')[1];
     const  limit=20;
       page=parseInt(page) ||1;
    let offset=(limit * (page - 1)) ||0;

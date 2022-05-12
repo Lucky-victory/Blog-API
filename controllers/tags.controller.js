@@ -31,11 +31,18 @@ const getAllTags= asyncHandler(async(req,res)=>{
  
  const getArticlesByTag=asyncHandler(async(req,res)=>{
      try{
-        let {page,sort='publishedAt|desc'}=req.query;
+        let {page,sort}=req.query;
+        if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
+         sort=SORT_LISTS[sort];
+          }
+          else{
+             sort=SORT_LISTS[ACCEPTABLE_SORT_NAMES[0]];
+          }
+          const orderBy=StringToArray(sort,'|')[0];
+          const order=StringToArray(sort,'|')[1];
         let {tag}=req.params;
         tag=StringToArray(tag);
-        const orderBy=StringToArray(sort,'|')[0];
-        const order=StringToArray(sort,'|')[1] ||'desc';
+    
       const  limit=20;
         page=parseInt(page) ||1;
      let offset=(limit * (page - 1)) ||0;
@@ -62,7 +69,9 @@ articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_user
    articles=articles.map((article)=>{
    article.title=decode(article.title);
    article.content=decode(article.content);
-   article.intro=decode(article.intro);
+      article.intro = decode(article.intro);
+      
+      
     article.author.bio=decode(article.author.bio);
   return article;
   });
