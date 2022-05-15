@@ -48,7 +48,7 @@ const getArticlesByAuthor=asyncHandler(async(req,res)=>{
    res.status(200).json({message:"No Articles","articles":[]})
    return
 }
-res.status(200).json({message:"Articles retrieved",status:200,articles,resultCount:recordCount});
+res.status(200).json({message:"Articles retrieved",status:200,articles,resultCount:articles.length});
    }
     catch(error){
         const status=error.status ||500;

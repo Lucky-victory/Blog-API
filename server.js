@@ -30,6 +30,7 @@ const profileRouter=require("./routes/profile.route");
 const tagsRouter=require('./routes/tags.route');
 const categoryRouter=require('./routes/category.route');
 const authorRouter=require('./routes/author.route');
+const commentRouter = require('./routes/comments.route');
 
 app.use('/articles',articlesRouter);
 app.use('/article',articleRouter);
@@ -38,6 +39,7 @@ app.use("/profile",profileRouter)
 app.use('/tags',tagsRouter);
 app.use('/categories',categoryRouter);
 app.use('/author',authorRouter);
+app.use('/comments',commentRouter);
 
 app.get('/',(req,res)=>{
    res.send('hello blog')

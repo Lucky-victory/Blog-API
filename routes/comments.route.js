@@ -1,7 +1,7 @@
 const router=require("express").Router();
-
-router.get("/:articleId");
-router.post("/new/:articleId")
+const { getComments } = require('../controllers/comments.controller');
+router.get("/:postId",getComments);
+router.post("/new/:postId")
 router.put("/edit/:commentId")
 
 router.delete('/:commentId')

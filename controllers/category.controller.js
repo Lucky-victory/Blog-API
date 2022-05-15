@@ -37,7 +37,7 @@ const getCategories=asyncHandler(async(req,res)=>{
      let offset=(limit * (page - 1)) ||0;
   const recordCountQuery=`SELECT count(id) as recordCount FROM BlogSchema.Articles WHERE published=true  AND category='${category}' `;
   const recordCountResult=await Articles.query(recordCountQuery);
-  const {recordCount}=recordCountResult[0];
+   const {recordCount}=recordCountResult[0];
         if((recordCount - offset ) <= 0 || (offset > recordCount)){
            res.status(200).json({message:"No more Articles","articles":[]});
         return
@@ -53,16 +53,14 @@ const getCategories=asyncHandler(async(req,res)=>{
    article.title=decode(article.title);
    article.content=decode(article.content);
    article.intro=decode(article.intro);
-
-
    article.author.bio= article?.author?.bio ? decode(article.author.bio) : null;
   return article;
   });
-  if(!!articles.length){
+  if(!articles.length){
     res.status(200).json({message:"No Articles","articles":[]})
     return
  }
- res.status(200).json({message:"Articles retrieved",status:200,articles,resultCount:recordCount});
+ res.status(200).json({message:"Articles retrieved",status:200,articles,resultCount:articles.length});
     }
      catch(error){
          const status=error.status ||500;
