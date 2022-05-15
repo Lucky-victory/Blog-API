@@ -1,15 +1,14 @@
 const asyncHandler=require('express-async-handler');
-const {NullOrUndefined,StringToArray,Nester, ObjectArrayToStringArray}=require('../helpers/utils');
+const {StringToArray,Nester, ObjectArrayToStringArray}=require('../helpers/utils');
 const Articles=require('../models/articles.model');
 const {decode}=require('html-entities');
-const { ARTICLES_SQL_QUERY } = require('../constants');
+const { ARTICLES_SQL_QUERY ,ACCEPTABLE_SORT_NAMES,SORT_LISTS} = require('../constants');
 const Tags = require('../models/tags.model');
 const ArticleTags = require('../models/articleTags.model');
 
 // Get all article tags
 const getAllTags= asyncHandler(async(req,res)=>{
     try{
-
        let {page}=req.query;
        const limit=20;
        page=parseInt(page) ||1;
@@ -46,24 +45,23 @@ const getAllTags= asyncHandler(async(req,res)=>{
       const  limit=20;
         page=parseInt(page) ||1;
      let offset=(limit * (page - 1)) ||0;
-//   const recordCountQuery=`SELECT count(id) as recordCount FROM BlogSchema.Tags ${!NullOrUndefined(tag) ? ` text LIKE("${tag.join('","')}")`:''} `;
+  const recordCountQuery=`SELECT count(id) as recordCount FROM BlogSchema.Tags text IN("${tag.join('","')}") `;
   
-//   const recordCountResult=await Tags.query(recordCountQuery);
-//   const {recordCount}=recordCountResult[0];
-//         if((recordCount - offset ) <= 0 || (offset > recordCount)){
-//   res.status(200).json({message:"No Articles","articles":[]});
-//       return
-//         }
+  const recordCountResult=await Tags.query(recordCountQuery);
+  const {recordCount}=recordCountResult[0];
+        if((recordCount - offset ) <= 0 || (offset > recordCount)){
+  res.status(200).json({message:"No Articles","articles":[]});
+      return
+        }
 let tagIds=await Tags.query(`SELECT id FROM BlogSchema.Tags WHERE text IN("${tag.join('","')}")`);
-console.log(tagIds);
-const postIds=await ArticleTags.query(`SELECT DISTINCT postId FROM BlogSchema.ArticleTags WHERE tagId IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
-console.log(postIds);
+        tagIds = ObjectArrayToStringArray(tagIds);
+const postIds=await ArticleTags.query(`SELECT DISTINCT postId FROM BlogSchema.ArticleTags WHERE tagId IN("${tagIds.join('","')}")`);
 
         const articlesQuery=`${ARTICLES_SQL_QUERY} AND a.id IN("${ObjectArrayToStringArray(postIds).join('","')}") ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
          
  let articles=await Articles.query(articlesQuery);
 
-articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_username","_profileImage"],{nestedTitle:"author"});
+articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedIn","_username","_profileImage"],{nestedTitle:"author"});
   
         // decode html entities
    articles=articles.map((article)=>{
@@ -72,10 +70,10 @@ articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedin","_user
       article.intro = decode(article.intro);
       
       
-    article.author.bio=decode(article.author.bio);
+    article.author.bio= article?.author?.bio ? decode(article.author.bio) : null;
   return article;
   });
-  if(!articles.length){
+  if(!!articles.length){
     res.status(200).json({message:"No Articles","articles":[]})
     return
  }

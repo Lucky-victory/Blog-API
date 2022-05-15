@@ -12,7 +12,7 @@ const converter=new Converter();
 const createUser= asyncHandler(async(req,res)=>{
     try{
     
-    const {profileImage="https://cdn.pixabay.com/photo/2016/08/21/16/31/emoticon-1610228__480.png",twitter,linkedIn,github,fullname,email,password}=req.body;
+    const {profileImage="https://cdn.pixabay.com/photo/2016/08/21/16/31/emoticon-1610228__480.png",fullname,email,password}=req.body;
     
     let {username,bio}=req.body;
     bio= converter.makeHtml(bio);
@@ -26,20 +26,19 @@ const createUser= asyncHandler(async(req,res)=>{
         username : fullname
         );
 
+        const [emailExist,usernameExist]= await Promise.all([Users.findOne({email}), Users.findOne({username})]);
     // check if a user with the email already exist;
-    const emailExist= await Users.findOne({email});
 
 if(emailExist){
 return res.status(400).json({message:"user already exist"});
     
 }
 // check if a user with the username already exist;
-const usernameExist= await Users.findOne({username});
 if(usernameExist){
 return res.status(400).json({message:`'${username}' have been taken`});
 }
 const joinedAt=GetLocalTime();
-const newUser= {id:GenerateUserID(), profileImage,bio,twitter,linkedIn,joinedAt,username,fullname,email,superUser:false,github};
+const newUser= {id:GenerateUserID(), profileImage,joinedAt,username,fullname,email,superUser:false};
 
 // hash the password before storing in database
 try{
