@@ -11,7 +11,7 @@ const ArticleTags = require('../models/articleTags.model');
 const Tags = require('../models/tags.model');
 
 
-const getPublishedArticles=asyncHandler(async(req,res)=>{
+const getPublishedArticles=async(req,res)=>{
    try{
       let {page,category,sort}=req.query;
       if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
@@ -52,18 +52,7 @@ const articlesId=articles.map((article)=>article.id);
      });
 
 const comments= await Comments.query(`SELECT count(id) as commentsCount,postId FROM BlogSchema.Comments WHERE postId IN ("${articlesId.join('","')}") GROUP BY postId`);
-// // get comment ids to query replies table;
-// const commentsId=comments.map((comment)=>comment.id);
 
-// let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
-// // combine comments with replies based on their related id
-// comments=ArrayBinder(comments,replies,{
-//    innerProp:"commentId",outerProp:"id",innerTitle:"replies"
-// });
-// combine Articles with Comments based on their related id
-// articles=ArrayBinder(articles,comments,{
-//    outerProp:"id",innerProp:"postId",innerTitle:"comments"
-// });
 for(let article of articles){
 for(let comment of comments){
 if(!article.id ==comment.postId){
@@ -85,12 +74,12 @@ if(!articles.length){
             const status=error.status ||500;
             res.status(status).json({message:"an error occurred",error,status})
           }
-});
+};
 
 
 
    // Add new article
-const createNewArticle=asyncHandler( async(req,res)=>{
+const createNewArticle= async(req,res)=>{
    try{
 
       if(!req.isAuthenticated) return res.status(403).json({message:"Unathorized, not logged in, you can't add an article",status:403});
@@ -129,13 +118,13 @@ const {readTime}=CalculateReadTime(totalWords)
         remainingTags=RemoveDuplicateTags(tagsExist,tags);
       }
       let tagsAsObj=StringArrayToObjectArray(remainingTags);
-      tagsAsObj=AddPropsToObject(tagsAsObj,{createdAt});
+      tagsAsObj=AddPropsToObject(tagsAsObj,[{createdAt}]);
       
       const {inserted_hashes:insertedArticleId}=await Articles.create(newArticle);
       let {inserted_hashes:insertedTagsId}=await Tags.createMany(tagsAsObj);
       let mergedTagIds=MergeArrays(insertedTagsId,duplicateTagsId);
       mergedTagIds=StringArrayToObjectArray(mergedTagIds,'tagId');
-      const tagIdsWithArticleId=AddPropsToObject(mergedTagIds,{postId:insertedArticleId[0],createdAt})
+      const tagIdsWithArticleId=AddPropsToObject(mergedTagIds,[{postId:insertedArticleId[0],createdAt}])
       await ArticleTags.createMany(tagIdsWithArticleId)
 
       res.status(201).json({status:201,message:"article successfully created","article":{id:insertedArticleId[0],...newArticle}})
@@ -145,5 +134,5 @@ const {readTime}=CalculateReadTime(totalWords)
    res.status(status).json({message:"an error occurred, couldn't create new article",error,status})
 
    }
-});
+};
 module.exports={getPublishedArticles,createNewArticle}

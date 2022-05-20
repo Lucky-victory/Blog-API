@@ -3,10 +3,10 @@ const router=require("express").Router();
 const {createUser,loginUser,deleteUser}=require("../controllers/auth.controller");
 const {setAuth,authenticateUser, getUserProfile,destroyAuth}=require("../middlewares/auth");
 
-router.post("/register",createUser);
-router.post("/login",loginUser,setAuth)
-router.get("/login",authenticateUser,getUserProfile);
-router.post("/logout",destroyAuth);
+router.post("/signup",createUser);
+router.post("/signin",loginUser,setAuth)
+router.get("/signin",authenticateUser,getUserProfile);
+router.post("/signout",destroyAuth);
 
 
 module.exports=router;

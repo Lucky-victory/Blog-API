@@ -5,9 +5,14 @@ const Articles=require('../models/articles.model');
 const { ARTICLES_SQL_QUERY, SORT_LISTS,ACCEPTABLE_SORT_NAMES } = require('../constants');
 
 
-const getArticlesByAuthor=asyncHandler(async(req,res)=>{
+/** 
+ * @param {import('../typings').Express.IRequest} req Request object
+ * 
+ */
+const getArticlesByAuthor=async(req,res)=>{
     try{
        let {page,sort}=req.query;
+       sort=String(sort);
        if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
       sort=SORT_LISTS[sort];
        }
@@ -54,7 +59,7 @@ res.status(200).json({message:"Articles retrieved",status:200,articles,resultCou
         const status=error.status ||500;
         res.status(status).json({message:"an error occurred",status,error})
     }
-})
+}
 
 module.exports={
 getArticlesByAuthor

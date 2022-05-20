@@ -9,7 +9,7 @@ const converter=new Converter();
 
 
 // register a new user/author
-const createUser= asyncHandler(async(req,res)=>{
+const createUser= async(req,res)=>{
     try{
     
     const {profileImage="https://cdn.pixabay.com/photo/2016/08/21/16/31/emoticon-1610228__480.png",fullname,email,password}=req.body;
@@ -57,11 +57,11 @@ catch(error){
     res.status(status).json({message:"an error occurred, couldn't create user",status,error});
 }
 
-});
+};
 
 
 // log a user/author in
-const loginUser=asyncHandler(async(req,res,next)=>{
+const loginUser=async(req,res,next)=>{
 try{
 
     const {password,email}=req.body;
@@ -89,7 +89,7 @@ catch(error){
     res.status(status).json({message:"an error occurred, couldn't login",status,error});
 
 }
-});
+};
 
 const deleteUser=async(req,res)=>{
 

@@ -67,8 +67,8 @@ const Utils = {
       const rawReadTime = wordCount / 200;
       const minutes = parseInt(String(rawReadTime).split('.')[0]);
 
-      let seconds = '.' + String(rawReadTime).split('.')[1];
-      seconds = seconds * .60;
+      let secondsStr = '.' + String(rawReadTime).split('.')[1];
+    let  seconds = parseFloat(secondsStr) * .60;
       const readTime = Math.ceil(minutes + seconds) || 0;
       return { readTime };
    },
@@ -78,6 +78,7 @@ const Utils = {
          strict: true,
          remove: /[*+~.()'"!:@]/g
       }
+      // @ts-ignore
       const slug = title ? slugify(title + ' ' + shortId(), slugifyOptions) : null;
       return slug;
    },
@@ -116,6 +117,7 @@ const Utils = {
          remove: /[*+~.()'"!:@]/g
       }
 
+      // @ts-ignore
       return (Utils.NullOrUndefined(name) ? slugify(defaultUsername, slugifyOptions) : slugify(name, slugifyOptions))
    },
     /**
@@ -186,11 +188,12 @@ const Utils = {
       }
    },
    /**
-    * @param {{[key:string]:any}[]} arrayOfObj
+    * @param {any[]} arrayOfObj
     * @returns {string[]}
     * **/
    ObjectArrayToStringArray(arrayOfObj) {
       if (!Array.isArray(arrayOfObj)) return arrayOfObj;
+
       return arrayOfObj.reduce((accum, item) => {
          if(!Utils.isObject(item)){
             return item
@@ -218,7 +221,7 @@ const Utils = {
          const duplicateTagsIds = [];
          for (let prevTag of prevTags) {
             if (newTags.includes(prevTag.text)) {
-               duplicateTagsIds.push(prevTags.id)
+               duplicateTagsIds.push(prevTag.id)
             }
          }
          return duplicateTagsIds

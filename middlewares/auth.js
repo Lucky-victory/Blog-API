@@ -1,5 +1,4 @@
 
-const asyncHandler=require("express-async-handler");
 const Users=require("../models/users.model");
 const { getJwtFromCookies,verifyToken,generateToken,setJwtToCookies } = require("../helpers/auth");
 const { NotNullOrUndefined } = require("../helpers/utils");
@@ -43,7 +42,7 @@ else{
 }
 }
 
-const getUserByUsername= asyncHandler(async(req,res,next)=>{
+const getUserByUsername= async(req,res,next)=>{
 const usernameSlug=req.params.username;
 if(!usernameSlug){
    return
@@ -64,7 +63,7 @@ let{bio}=currentUser;
 bio=decode(bio);
 res.json({"user":{id,fullname,username,bio,profileImage,twitter,linkedIn,github,isAuthorized,isAuthenticated,csrfToken:req.csrfToken()},message:"user retrieved"});
 
-});
+};
 
 
 
@@ -72,15 +71,18 @@ const destroyAuth= (req,res)=>{
    const {token}=getJwtFromCookies();
       if(token){
          setJwtToCookies(res);
-         res.redirect("/")
+         res.status(308).redirect("/")
       }
    
 }
 
-const userProfileEdit=asyncHandler(async(req,res)=>{
+const userProfileEdit=async(req,res)=>{
 const {userId,isAuthenticated}=req;
 if(!isAuthenticated){
-   res.redirect("/account/login");
+   res.status(400).json({
+      message:'Not logged In',
+      status:400
+   })
    return;
 }
 const userExist= await Users.findOne({id:userId});
@@ -99,7 +101,7 @@ const infoToUpdate=req.body;
  await Users.update({id:userId, ...NotNullOrUndefined(infoToUpdate)});
    res.send({message:'profile successfully updated',status:200})
 
-});
+};
 
 
    

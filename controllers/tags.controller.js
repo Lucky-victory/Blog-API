@@ -1,4 +1,4 @@
-const asyncHandler=require('express-async-handler');
+
 const {StringToArray,Nester, ObjectArrayToStringArray}=require('../helpers/utils');
 const Articles=require('../models/articles.model');
 const {decode}=require('html-entities');
@@ -7,7 +7,7 @@ const Tags = require('../models/tags.model');
 const ArticleTags = require('../models/articleTags.model');
 
 // Get all article tags
-const getAllTags= asyncHandler(async(req,res)=>{
+const getAllTags= async(req,res)=>{
     try{
        let {page}=req.query;
        const limit=20;
@@ -26,9 +26,9 @@ const getAllTags= asyncHandler(async(req,res)=>{
        const status=error.status ||500;
     res.status(status).json({message:"an error occurred",error,status})
     }
- });
+ };
  
- const getArticlesByTag=asyncHandler(async(req,res)=>{
+ const getArticlesByTag=async(req,res)=>{
      try{
         let {page,sort}=req.query;
         if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
@@ -82,5 +82,6 @@ articles=Nester(articles,["_fullname","_id","_bio","_twitter","_linkedIn","_user
          const status=error.status||500;
          res.status(status).json({message:"an error occurred",status,error})
      }
- })
+ }
+
 module.exports={getAllTags,getArticlesByTag}

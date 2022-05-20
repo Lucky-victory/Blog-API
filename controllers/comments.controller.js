@@ -1,10 +1,10 @@
 
 const Comments=require("../models/comments.model");
 const Replies=require("../models/replies.model");
-const asyncHandler=require('express-async-handler');
 const { ArrayBinder } = require('../helpers/utils');
 
-const getComments = asyncHandler(async (req, res) => {
+
+const getComments = async (req, res) => {
     try {
         
         const { postId } = req.params;
@@ -21,7 +21,7 @@ const getComments = asyncHandler(async (req, res) => {
         comments=ArrayBinder(comments,replies,{
             innerProp:"commentId",outerProp:"id",innerTitle:"replies"
         });
-        res.status(200).json({
+       res.status(200).json({
             message:'comments retrieved',comments
         })
     }
@@ -30,7 +30,7 @@ const getComments = asyncHandler(async (req, res) => {
          res.status(status).json({message:"an error occurred",status,error})
      
     }
-    });
+    };
 
 
 module.exports = {

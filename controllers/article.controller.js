@@ -2,15 +2,13 @@
 const Articles=require('../models/articles.model');
 const Users=require("../models/users.model");
 const Comments=require("../models/comments.model");
-const Replies=require("../models/replies.model");
-const asyncHandler=require('express-async-handler');
 const Tags = require('../models/tags.model');
 const ArticleTags = require('../models/articleTags.model');
 const {  GenerateSlug, NullOrUndefined, isEmpty,ArrayBinder, RemoveKeysFromObj, ObjectArrayToStringArray,GetLocalTime} = require('../helpers/utils');
 const { decode } = require('html-entities');
 
 // get a single article
-const getArticleBySlug= asyncHandler (async (req,res)=>{
+const getArticleBySlug= async (req,res)=>{
    try{
 
       const urlSlug=req.params.slug;
@@ -38,37 +36,31 @@ let tags=await Tags.query(`SELECT text FROM BlogSchema.Tags WHERE id IN("${Objec
 // transfrom the object response into strings
  tags=ObjectArrayToStringArray(tags);
 
-// query comments table with article id
-let comments= await Comments.query(`SELECT id,text,postId,userId,createdAt FROM BlogSchema.Comments WHERE postId='${id}' ORDER BY createdAt DESC`);
-// get comment ids to query replies table;
-const commentsId=comments.map((comment)=>comment.id);
 
-let replies=await Replies.query(`SELECT id,text,commentId,userId,createdAt FROM BlogSchema.Replies WHERE commentId IN ("${commentsId.join('","')}") ORDER BY createdAt DESC`);
-// combine comments with replies based on their related id
-comments=ArrayBinder(comments,replies,{
-   innerProp:"commentId",outerProp:"id",innerTitle:"replies"
-});
 // combine Articles with Comments based on their related id
+const comments= await Comments.query(`SELECT count(id) as commentsCount FROM BlogSchema.Comments WHERE postId='${article.id}'`);
+
+const {commentsCount}=comments[0].commentsCount;
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
-res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,intro,heroImage,id,category,author,readTime, tags,comments});
+res.status(200).json({title,content,slug,views,publishedAt,modifiedAt,intro,heroImage,id,category,author,readTime, tags,commentsCount});
 
 }
 catch(err){
    const status=err.status ||500;
    res.status(status).json({message:"an error occurred",error:err,status})
 }
-});
+};
 
 // edit article
-const editArticle=asyncHandler (async(req,res)=>{
+const editArticle=async(req,res)=>{
    try{
       if(!req.isAuthenticated) return res.status(403).json({message:'Forbidden, not logged in',status:403});
       const {userId,superUser}=req;
    
       const {articleId}=req.params;
-const article=Articles.findOne({id:articleId})
+const article= await Articles.findOne({id:articleId})
  if(!article){
         res.status(404).json({"status":404,message:`article with id '${articleId}' was not found`})
       return
@@ -81,7 +73,7 @@ const article=Articles.findOne({id:articleId})
       
       // the updateSlug property is to decide whether to update the slug when the title gets updated, 
       // updating a slug would cause 404 errors for shared links
-     // this is why i made slug update optional
+     // this is why slug update was made optional
       const {title,updateSlug}=req.body;
       const articleToUpdate=req.body || {};
       if(title && updateSlug){
@@ -99,10 +91,10 @@ const article=Articles.findOne({id:articleId})
       const status=err.status ||500;
       res.status(status).json({message:"an error occurred",error:err,status})
    }
-});
+};
 
 // delete an article
-const deleteArticle=asyncHandler(async(req,res)=>{
+const deleteArticle=async(req,res)=>{
    try{
 
       const {articleId}=req.params;
@@ -122,9 +114,9 @@ catch(err){
    res.status(status).json({"message":"an error occurred","error":err,status});
 }
    
-});
+};
 
-const getArticleById=asyncHandler( async(id)=>{
+const getArticleById=async(id)=>{
 try{
 const article=await Articles.findById([id]);
 return [article,null];
@@ -135,6 +127,4 @@ catch(error){
    
 }
 
-
-)
 module.exports={editArticle,deleteArticle,getArticleBySlug,getArticleById}

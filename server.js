@@ -3,17 +3,22 @@ require('dotenv').config();
 const express=require('express');
 const app=express();
 const PORT=process.env.PORT ||4456;
+// @ts-ignore
 const cookieParser=require('cookie-parser');
+
 const createErrors=require('http-errors');
 const fs=require('fs');
 const path=require('path');
+
 const morgan=require("morgan");
 const { IS_DEV } = require('./constants');
 const connectDB=require('./config/db.config');
 connectDB();
 
 
+// @ts-ignore
 app.use(cookieParser());
+// @ts-ignore
 app.use(morgan("dev"));
 // middleware to accept json body requests.
 app.use(express.json());
@@ -46,10 +51,12 @@ app.get('/',(req,res)=>{
 });
 
 
+
 app.use((req,res,next)=>{
 
    next(createErrors(404))
 });
+
 
 app.use((err,req,res,next)=>{
 const errorLog=errorBuilder(err,req);
@@ -59,6 +66,7 @@ const errorLog=errorBuilder(err,req);
    })
    res.json(errorLog)
 });
+
 function errorBuilder(err,req,){
    const {stack,status=500,code,message}=err;
 return {

@@ -1,10 +1,12 @@
-const asyncHandler=require('express-async-handler');
+
 const {Nester,StringToArray, ObjectArrayToStringArray}=require('../helpers/utils');
 const {decode}=require('html-entities');
 const Articles=require('../models/articles.model');
 const { ARTICLES_SQL_QUERY,ACCEPTABLE_SORT_NAMES,SORT_LISTS } = require('../constants');
 // Get all article categories
-const getCategories=asyncHandler(async(req,res)=>{
+
+
+const getCategories=async(req,res)=>{
     try{
  
        let {page}=req.query;
@@ -19,8 +21,9 @@ const getCategories=asyncHandler(async(req,res)=>{
        const status=error.status ||500;
        res.status(status).json({message:"an error occurred",error,status})
     }
-    });
- const getArticlesByCategory=asyncHandler(async(req,res)=>{
+    };
+
+ const getArticlesByCategory=async(req,res)=>{
      try{
         let {page,sort}=req.query;
         const {category}=req.params;
@@ -66,7 +69,7 @@ const getCategories=asyncHandler(async(req,res)=>{
          const status=error.status ||500;
          res.status(status).json({message:"an error occurred",status,error})
      }
- })
+ }
 module.exports={
     getCategories,
     getArticlesByCategory
