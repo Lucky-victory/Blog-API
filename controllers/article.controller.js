@@ -33,14 +33,14 @@ const tagIds=await ArticleTags.query(`SELECT tagId FROM BlogSchema.ArticleTags W
 
 // get tag(s) from Tags table with tagIds
 let tags=await Tags.query(`SELECT text FROM BlogSchema.Tags WHERE id IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
-// transfrom the object response into strings
+// transfrom the object response into an array of strings
  tags=ObjectArrayToStringArray(tags);
 
 
 // combine Articles with Comments based on their related id
 const comments= await Comments.query(`SELECT count(id) as commentsCount FROM BlogSchema.Comments WHERE postId='${article.id}'`);
 
-const {commentsCount}=comments[0].commentsCount;
+const {commentsCount}=comments[0];
 
 const newViewsCount=parseInt(views)+1 || 1;
  await Articles.update([{id,'views':newViewsCount}]);
