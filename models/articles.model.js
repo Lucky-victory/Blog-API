@@ -13,10 +13,9 @@ const BlogSchema=new Schema({name:"BlogSchema",fields:{
    readTime:Number,
    heroImage:String,
    intro:String,
-   excerpt:String,
    status:String,
-   published:Boolean
-},silent:true,primaryKey:'id'});
+
+},silent:true,primaryKey:'pid'});
 
 const Articles=new Model("Articles",BlogSchema);
 module.exports=Articles;

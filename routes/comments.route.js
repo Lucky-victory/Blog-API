@@ -1,6 +1,6 @@
 const router=require("express").Router();
-const { getComments } = require('../controllers/comments.controller');
-router.get("/:postId",getComments);
+const { getApprovedComments } = require('../controllers/comments.controller');
+router.get("/:postId",getApprovedComments);
 router.post("/new/:postId")
 router.put("/edit/:commentId")
 

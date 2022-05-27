@@ -1,12 +1,12 @@
 
 const { Sqler } = require('harpee');
 
-const { query } = new Sqler().select(["a.id", "a.publishedAt", "a.intro", "a.title", "a.heroImage", "a.slug", "a.category", "a.readTime", "a.modifiedAt", "a.authorId", "a.views", "a.content", "u.fullname as _fullname", "u.id as _id", "u.twitter as _twitter", "u.linkedIn as _linkedIn", "u.username as _username", "u.profileImage as _profileImage", "u.bio as _bio"])
+const { query } = new Sqler().select(["a.pid as id", "a.publishedAt", "a.intro", "a.title", "a.heroImage", "a.slug", "a.category", "a.readTime", "a.modifiedAt", "a.authorId", "a.views", "a.content", "u.fullname as _fullname", "u.uid as _id", "u.twitter as _twitter", "u.linkedIn as _linkedIn", "u.username as _username", "u.profileImage as _profileImage", "u.bio as _bio"])
     .from("BlogSchema", "Articles").as("a")
     .innerJoin("BlogSchema", "Users").as("u")
     .on("a", "authorId")
-    .isEqual("u", "id")
-    .where("a.published=true");
+    .isEqual("u", "uid")
+    .where("a.status='published'");
     const ARTICLES_SQL_QUERY=query;
 const IS_PROD=process.env.NODE_ENV==='production';
 const IS_DEV=process.env.NODE_ENV !=='production';

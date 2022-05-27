@@ -38,7 +38,7 @@ if(usernameExist){
 return res.status(400).json({message:`'${username}' have been taken`});
 }
 const joinedAt=GetLocalTime();
-const newUser= {id:GenerateUserID(), profileImage,joinedAt,username,fullname,email,superUser:false};
+const newUser= {uid:GenerateUserID(), profileImage,joinedAt,username,fullname,email,verified:false,superUser:false};
 
 // hash the password before storing in database
 try{

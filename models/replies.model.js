@@ -1,14 +1,13 @@
 const {Schema,Model}=require("harpee");
 
 const BlogSchema=new Schema({name:"BlogSchema",fields:{
-   approved:Boolean,
    commentId:String,
    text:String,
    createdAt:Date,
    modifiedAt:Date,
    userId:String,
    status:String
-},silent:true,primaryKey:'id'});
+},silent:true,primaryKey:'rid'});
 
 const Replies=new Model("Replies",BlogSchema);
 module.exports=Replies;

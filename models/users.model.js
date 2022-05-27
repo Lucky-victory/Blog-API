@@ -1,8 +1,7 @@
 const {Schema,Model}=require("harpee");
 
 const BlogSchema=new Schema({name:"BlogSchema",fields:{
-   firstName:String,
-   lastName:String,
+   fullname:String,
    username:String,
    email:String,
    password:String,
@@ -13,8 +12,9 @@ const BlogSchema=new Schema({name:"BlogSchema",fields:{
    bio:String,
    profileImage:String,
    superUser:Boolean,
-   status:String
-},silent:true,primaryKey:'id'});
+   status:String,
+   verified:Boolean
+},silent:true,primaryKey:'uid'});
 
 const Users=new Model("Users",BlogSchema);
 

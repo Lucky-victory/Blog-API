@@ -5,7 +5,7 @@ const Users= require("../models/users");
 const Articles= require("../models/articles");
 const Comments= require("../models/comments");
 const Replies= require("../models/replies");
-const ArticleTags = require('../models/articleTags');
+const ArticleTags = require('../models/article-tags');
 const Tags = require('../models/tags');
 
 async function initializeDB(){

@@ -7,13 +7,13 @@ const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
 const { ARTICLES_SQL_QUERY,ACCEPTABLE_SORT_NAMES,SORT_LISTS} = require('../constants');
-const ArticleTags = require('../models/articleTags.model');
+const ArticleTags = require('../models/article-tags.model');
 const Tags = require('../models/tags.model');
 
 
 const getPublishedArticles=async(req,res)=>{
    try{
-      let {page,category,sort}=req.query;
+      let {page,category,sort,limit}=req.query;
       if(ACCEPTABLE_SORT_NAMES.indexOf(sort) !== -1){
          sort=SORT_LISTS[sort];
           }
@@ -23,7 +23,7 @@ const getPublishedArticles=async(req,res)=>{
 
           const orderBy=StringToArray(sort,'|')[0];
           const order=StringToArray(sort,'|')[1];
-    const  limit=20;
+      limit=parseInt(limit) || 20;
       page=parseInt(page) ||1;
    let offset=(limit * (page - 1)) ||0;
    const recordCountQuery=`SELECT count(id) as recordCount FROM BlogSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
@@ -55,9 +55,11 @@ const comments= await Comments.query(`SELECT count(id) as commentsCount,postId F
 
 for(let article of articles){
 for(let comment of comments){
-if(!article.id ==comment.postId){
+if(article.id !==comment.postId){
    article['commentsCount']=0;
-   continue}
+   
+   
+}
    else{
    article['commentsCount']=comment.commentsCount;
 }
@@ -88,7 +90,7 @@ const createNewArticle= async(req,res)=>{
          res.status(400).json({message:"Please include article to add",status:400})
          return;
       }
-   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',tags,published=false,title,content,intro }=req.body;
+   let {category,heroImage='https://images.pexels.com/photos/4458/cup-mug-desk-office.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',status='draft',title,content,intro,tags}=req.body;
   
 
 if(!(title || content)){
@@ -106,7 +108,7 @@ const slug= GenerateSlug(title);
 const authorId=req.userId;
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
 const {readTime}=CalculateReadTime(totalWords)
- const publishedAt=published? createdAt : null;
+ const publishedAt=status=='published'? createdAt : null;
  const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
       
      // try getting tags from database to see if they exist

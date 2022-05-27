@@ -26,7 +26,7 @@ const getArticlesByAuthor=async(req,res)=>{
        page=parseInt(page) ||1;
     let offset=(limit * (page - 1)) ||0;
     // check the number of articles  (record count) by that author
- const recordCountQuery=`SELECT count(a.id) as recordCount FROM BlogSchema.Articles as a INNER JOIN BlogSchema.Users as u ON a.authorId=u.id WHERE a.published=true AND u.username='${author}'`;
+ const recordCountQuery=`SELECT count(a.pid) as recordCount FROM BlogSchema.Articles as a INNER JOIN BlogSchema.Users as u ON a.authorId=u.uid WHERE a.status='published' AND u.username='${author}'`;
  const recordCountResult=await Articles.query(recordCountQuery);
  const {recordCount}=recordCountResult[0];
  // use the record count to handle pagination
