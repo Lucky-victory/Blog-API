@@ -2,11 +2,11 @@
 const Articles=require('../models/articles.model');
 const Comments=require('../models/comments.model');
 const asyncHandler=require('express-async-handler');
-const {Nester,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty,  AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime}=require("../helpers/utils");
+const {Nester,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty,  AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime, isLongerThan}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
-const { ARTICLES_SQL_QUERY,ACCEPTABLE_SORT_NAMES,SORT_LISTS} = require('../constants');
+const { ARTICLES_SQL_QUERY,ACCEPTABLE_SORT_NAMES,SORT_LISTS, MAX_ARTICLE_TAGS} = require('../constants');
 const ArticleTags = require('../models/article-tags.model');
 const Tags = require('../models/tags.model');
 
@@ -109,8 +109,10 @@ const authorId=req.userId;
 const totalWords= String(NotNullOrUndefined(title) + NotNullOrUndefined(content)) ||'';
 const {readTime}=CalculateReadTime(totalWords)
  const publishedAt=status=='published'? createdAt : null;
- const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,published,modifiedAt:createdAt,views:0,readTime,intro};
+ const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,modifiedAt:createdAt,views:0,readTime,intro,status};
       
+ // If Tags are more than {MAX_ARTICLE TAGS}, remove the extras
+ tags=isLongerThan(tags,MAX_ARTICLE_TAGS) ? MAX_ARTICLE_TAGS : (tags) 
      // try getting tags from database to see if they exist
      const tagsExist=await Tags.find({getAttributes:["id","text"],where:`text IN("${tags.join('","')}")`});
      let remainingTags=tags;

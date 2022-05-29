@@ -1,12 +1,12 @@
 require('dotenv').config();
 const connectDB=require("./db.config");
 connectDB();
-const Users= require("../models/users");
-const Articles= require("../models/articles");
-const Comments= require("../models/comments");
-const Replies= require("../models/replies");
-const ArticleTags = require('../models/article-tags');
-const Tags = require('../models/tags');
+const Users= require("../models/users.model");
+const Articles= require("../models/articles.model");
+const Comments= require("../models/comments.model");
+const Replies= require("../models/replies.model");
+const ArticleTags = require('../models/article-tags.model');
+const Tags = require('../models/tags.model');
 
 async function initializeDB(){
 

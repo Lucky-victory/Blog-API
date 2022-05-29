@@ -254,6 +254,12 @@ RemoveDuplicateTags(prevTags, newTags) {
    }
    return [];
 },
+/**
+ * Merge two arrays
+ * @param {any[]} arr - array to be merged
+ * @param {any[]} arr2 - array to be merged 
+ * @returns 
+ */
 MergeArrays(arr=[], arr2=[]) {
    const newArr = [];
    newArr.push(...arr, ...arr2)
@@ -268,6 +274,37 @@ const currentHour=new Date().getHours();
 const localDateTimeInMilliseconds=new Date().setHours(currentHour - timeZoneOffsetInHours);
 const localTime=new Date(localDateTimeInMilliseconds).toISOString();
 return localTime;
+},
+/**
+ * 
+ * @param {*} val - the value to be transformed to an array  
+ * @returns {any[]}
+ */
+toArray(val){
+   if(!Utils.NullOrUndefined(val) && !Array.isArray(val)){
+val=[val]
+return val   
+}
+
+},
+/**
+ * 
+ * @param {any[]} arr  - an array to be checked
+ * @param {number} length - the length to measure the array's length
+ * @returns {boolean}
+ */
+isLongerThan(arr,length){
+if(!Array.isArray(arr)) return;
+return arr.length > length;
+},
+/**
+ * 
+ * @param {any[]} arr - the array to be shortened 
+ * @param {number} size - the size to shorten the array to
+ */
+shortenArray(arr,size){
+  if(!Array.isArray(arr)) return;
+  return arr.splice(0) 
 }
 }
 

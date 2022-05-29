@@ -19,9 +19,10 @@ const SORT_LISTS={
  }
 
  const  ACCEPTABLE_SORT_NAMES=['latest','popular','short','long'];
- 
+const MAX_ARTICLE_TAGS=5; 
 module.exports={
     IS_PROD,
+    MAX_ARTICLE_TAGS,
     IS_DEV,
     ARTICLES_SQL_QUERY,
     ACCEPTABLE_SORT_NAMES,

@@ -40,7 +40,7 @@ const addNewComment = async (req, res) => {
       message: "No 'postId' provided"
    });
    const { userId } = req;
-   const { text, status = 'pending', postId } = req.body;
+   const { text, status = 'pending'} = req.body;
    const createdAt = GetLocalTime();
    await Comments.create({
       text,
@@ -54,5 +54,5 @@ const addNewComment = async (req, res) => {
 
 
 module.exports = {
-   getApprovedComments
+   getApprovedComments,addNewComment
 }
