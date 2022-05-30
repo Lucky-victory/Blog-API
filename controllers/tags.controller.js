@@ -13,7 +13,7 @@ const getAllTags = async (req, res) => {
       page = +page || 1;
       let offset = (limit * (page - 1)) || 0;
       // select article tags from Articles table, this returns an array of objects with tags props
-      let allTags = await Tags.query(`SELECT DISTINCT text FROM BlogSchema.Tags ${limit} ${offset}`);
+      let allTags = await Tags.query(`SELECT DISTINCT text FROM BlogSchema2.Tags ${limit} ${offset}`);
 
       // filter out null tags, and flatten the object into an array of strings
       allTags = ObjectArrayToStringArray(allTags);
@@ -44,7 +44,7 @@ const getArticlesByTag = async (req, res) => {
       limit = +limit || 20;
       page = +page || 1;
       let offset = (limit * (page - 1)) || 0;
-      const recordCountQuery = `SELECT count(tid) as recordCount FROM BlogSchema.Tags WHERE text IN("${tag.join('","')}") `;
+      const recordCountQuery = `SELECT count(tid) as recordCount FROM BlogSchema2.Tags WHERE text IN("${tag.join('","')}") `;
 
       const recordCountResult = await Tags.query(recordCountQuery);
       const { recordCount } = recordCountResult[0];
@@ -53,9 +53,9 @@ const getArticlesByTag = async (req, res) => {
          res.status(200).json({ message: "No Articles", "articles": [] });
          return
       }
-      let tagIds = await Tags.query(`SELECT tid FROM BlogSchema.Tags WHERE text IN("${tag.join('","')}")`);
+      let tagIds = await Tags.query(`SELECT tid FROM BlogSchema2.Tags WHERE text IN("${tag.join('","')}")`);
       tagIds = ObjectArrayToStringArray(tagIds);
-      let postIds = await ArticleTags.query(`SELECT DISTINCT postId FROM BlogSchema.ArticleTags WHERE tagId IN("${tagIds.join('","')}")`);
+      let postIds = await ArticleTags.query(`SELECT DISTINCT postId FROM BlogSchema2.ArticleTags WHERE tagId IN("${tagIds.join('","')}")`);
       postIds = ObjectArrayToStringArray(postIds);
       const articlesQuery = `${ARTICLES_SQL_QUERY} AND a.pid IN("${postIds.join('","')}") ORDER BY a.${orderBy} ${order} LIMIT ${limit} OFFSET ${offset} `;
 

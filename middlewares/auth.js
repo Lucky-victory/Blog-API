@@ -19,7 +19,7 @@ const authenticateUser = (req, res, next) => {
    const { token } = getJwtFromCookies(req);
    if (!token) {
       res.status(403).json({ message: 'Forbidden, not logged in', status: 403 })
-
+return
    }
    const { id, superUser } = verifyToken(token);
    if (id) {
@@ -72,7 +72,7 @@ const destroyAuth = (req, res) => {
    const { token } = getJwtFromCookies();
    if (token) {
       setJwtToCookies(res);
-      res.status(308).redirect("/")
+      res.status(307).redirect("/")
    }
 
 }

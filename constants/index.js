@@ -2,8 +2,8 @@
 const { Sqler } = require('harpee');
 
 const { query } = new Sqler().select(["a.pid as id", "a.publishedAt", "a.intro", "a.title", "a.heroImage", "a.slug", "a.category", "a.readTime", "a.modifiedAt", "a.authorId", "a.views", "a.content", "u.fullname as _fullname", "u.uid as _id", "u.twitter as _twitter", "u.linkedIn as _linkedIn", "u.username as _username", "u.profileImage as _profileImage", "u.bio as _bio"])
-    .from("BlogSchema", "Articles").as("a")
-    .innerJoin("BlogSchema", "Users").as("u")
+    .from("BlogSchema2", "Articles").as("a")
+    .innerJoin("BlogSchema2", "Users").as("u")
     .on("a", "authorId")
     .isEqual("u", "uid")
     .where("a.status='published'");

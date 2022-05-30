@@ -12,7 +12,7 @@ const getCategories = async (req, res) => {
       limit = +limit || 20;
       page = +page || 1;
       let offset = (limit * (page - 1)) || 0;
-      let categories = await Articles.query(`SELECT DISTINCT category FROM BlogSchema.Articles ${limit} ${offset} WHERE status='published'`);
+      let categories = await Articles.query(`SELECT DISTINCT category FROM BlogSchema2.Articles ${limit} ${offset} WHERE status='published'`);
       categories = ObjectArrayToStringArray(categories);
       res.status(200).json({ message: "Categories retrieved", status: 200, categories })
    }

@@ -21,21 +21,21 @@ const getArticleBySlug = async (req, res) => {
          return;
       }
 
-      const { title, publishedAt, modifiedAt, slug, heroImage, id, authorId, category, views, readTime } = article;
+      const { title, publishedAt, modifiedAt, slug, heroImage, pid:id, authorId, category, views, readTime } = article;
       let { content, intro } = article;
       content = decode(content);
       intro = decode(intro);
       let author = await Users.findOne({ "uid": authorId }, ["fullname", "twitter", "linkedIn", "uid as id", "username", "profileImage", "bio"]);
       author['bio'] = decode(author['bio']);
       // get tag ids from ArticleTags table where article id matches
-      const tagIds = await ArticleTags.query(`SELECT tagId FROM BlogSchema.ArticleTags WHERE postId='${id}'`);
+      const tagIds = await ArticleTags.query(`SELECT tagId FROM BlogSchema2.ArticleTags WHERE postId='${id}'`);
 
       // get tag(s) from Tags table with tagIds
-      let tags = await Tags.query(`SELECT text FROM BlogSchema.Tags WHERE tid IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
+      let tags = await Tags.query(`SELECT text FROM BlogSchema2.Tags WHERE tid IN("${ObjectArrayToStringArray(tagIds).join('","')}")`);
       // transfrom the object response into an array of strings
       tags = ObjectArrayToStringArray(tags);
 
-      const comments = await Comments.query(`SELECT count(cid) as commentsCount FROM BlogSchema.Comments WHERE postId='${article.id}'`);
+      const comments = await Comments.query(`SELECT count(cid) as commentsCount FROM BlogSchema2.Comments WHERE postId='${article.pid}' AND status='approved' `);
 
       const { commentsCount } = comments[0];
 

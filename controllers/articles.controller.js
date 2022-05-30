@@ -2,7 +2,7 @@
 const Articles=require('../models/articles.model');
 const Comments=require('../models/comments.model');
 const asyncHandler=require('express-async-handler');
-const {Nester,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty,  AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime, isLongerThan}=require("../helpers/utils");
+const {Nester,GenerateSlug,CalculateReadTime, StringToArray, NullOrUndefined, NotNullOrUndefined, isEmpty,  AddPropsToObject, StringArrayToObjectArray,MergeArrays,GetIdOfDuplicateTags,RemoveDuplicateTags, GetLocalTime, isLongerThan,shortenArray}=require("../helpers/utils");
 const {Converter}=require("showdown");
 const converter=new Converter();
 const {encode,decode}=require("html-entities");
@@ -26,7 +26,7 @@ const getPublishedArticles=async(req,res)=>{
       limit=parseInt(limit) || 20;
       page=parseInt(page) ||1;
    let offset=(limit * (page - 1)) ||0;
-   const recordCountQuery=`SELECT count(id) as recordCount FROM BlogSchema.Articles WHERE published=true ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
+   const recordCountQuery=`SELECT count(pid) as recordCount FROM BlogSchema2.Articles WHERE status='published' ${!NullOrUndefined(category) ? ` AND category='${category}'`:''} `;
   const recordCountResult=await Articles.query(recordCountQuery);
   const {recordCount}=recordCountResult[0];
       if((recordCount - offset ) <= 0 || (offset > recordCount)){
@@ -51,7 +51,7 @@ const articlesId=articles.map((article)=>article.id);
      return article;
      });
 
-const comments= await Comments.query(`SELECT count(id) as commentsCount,postId FROM BlogSchema.Comments WHERE postId IN ("${articlesId.join('","')}") GROUP BY postId`);
+const comments= await Comments.query(`SELECT count(cid) as commentsCount,postId FROM BlogSchema2.Comments WHERE postId IN ("${articlesId.join('","')}") GROUP BY postId`);
 
 for(let article of articles){
 for(let comment of comments){
@@ -84,8 +84,7 @@ if(!articles.length){
 const createNewArticle= async(req,res)=>{
    try{
 
-      if(!req.isAuthenticated) return res.status(403).json({message:"Unathorized, not logged in, you can't add an article",status:403});
-
+      
       if(isEmpty(req.body)){
          res.status(400).json({message:"Please include article to add",status:400})
          return;
@@ -112,9 +111,9 @@ const {readTime}=CalculateReadTime(totalWords)
  const newArticle= {createdAt,publishedAt,title,content,heroImage,slug,category,authorId,modifiedAt:createdAt,views:0,readTime,intro,status};
       
  // If Tags are more than {MAX_ARTICLE TAGS}, remove the extras
- tags=isLongerThan(tags,MAX_ARTICLE_TAGS) ? MAX_ARTICLE_TAGS : (tags) 
-     // try getting tags from database to see if they exist
-     const tagsExist=await Tags.find({getAttributes:["id","text"],where:`text IN("${tags.join('","')}")`});
+      tags = isLongerThan(tags, MAX_ARTICLE_TAGS) ? shortenArray(tags, MAX_ARTICLE_TAGS) : tags;
+     // get tags from database to see if they already exist
+     const tagsExist=await Tags.find({getAttributes:["tid as id","text"],where:`text IN("${tags.join('","')}")`});
      let remainingTags=tags;
      let duplicateTagsId;
      if(tagsExist.length){

@@ -1,6 +1,6 @@
 const {Schema,Model}=require("harpee");
 
-const BlogSchema=new Schema({name:"BlogSchema",fields:{
+const BlogSchema=new Schema({name:"BlogSchema2",fields:{
    title:String,
    content:String,
    createdAt:Date,

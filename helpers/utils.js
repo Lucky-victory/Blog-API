@@ -1,7 +1,7 @@
 const slugify = require('slugify');
 const shortId = require('shortid');
 const randomWords = require("random-words");
-
+const { v4:uuidv4} = require('uuid');
 
 const Utils = {
    randomHexId(length = 4) {
@@ -127,9 +127,10 @@ const Utils = {
     * @example user-12345678
     * **/
   
-   GenerateUserID(prefix = 'user', suffix = '') {
-      const randomNumber = Math.floor(Math.random() * 1E9);
-      return `${prefix}-${randomNumber}-${suffix}`;
+   GenerateUserID(prefix = 'u-', suffix = '') {
+      let userId = uuidv4();
+      userId = userId.replace(/[-]/gi, '');
+      return `${prefix}${userId}${suffix}`;
    },
     /**
     * @param {{[key:string]:any}} obj
@@ -303,8 +304,8 @@ return arr.length > length;
  * @param {number} size - the size to shorten the array to
  */
 shortenArray(arr,size){
-  if(!Array.isArray(arr)) return;
-  return arr.splice(0) 
+   if (!Array.isArray(arr)) return [];
+   return (arr.slice(0,size))
 }
 }
 
